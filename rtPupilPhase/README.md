@@ -25,7 +25,7 @@ Additionally, if the primary display device is a macOS device with a built-in re
 
 ## Real-time Parameters
 
-Recommended parameters for the real-time processing of pupillometry data can be found in lines 165-198. If you would like to change these parameters, we suggest using the [MATLAB simulation procedure]() provided in this repository to test the impact of these changes prior to online data collection.
+Recommended parameters for the real-time processing of pupillometry data can be found in lines 165-198. If you would like to change these parameters, we suggest using the [MATLAB simulation procedures](https://github.com/nimh-sfim/rtPupilPhase/tree/main/simulations) provided in this repository to test the impact of these changes prior to online data collection.
 
 ## Task Parameters
 
