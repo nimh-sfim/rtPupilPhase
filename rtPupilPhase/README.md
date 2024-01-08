@@ -19,7 +19,7 @@ This script additionally requires the following Python packages:
 
 ## Hardware Requirements/Notes
 
-By default, this code was developed to work with an Eyelink 1000 Plus. If you are using a different Eyelink eye-tracker, please be sure to change the `eyelink_ver` variable (line 248). Given that the EyeLink 1000 Plus has a maximum online recording limit of 60Hz, pupil samples are taken every 17ms. This value may change depending on your hardware - if so, be sure to change the `ms_per_sample` (line 150) to reflect your hardware to ensure that the real-time algorithm performs as expected.
+By default, this code was developed to work with an Eyelink 1000 Plus (SR Research, Inc.). If you are using a different Eyelink eye-tracker, please be sure to change the `eyelink_ver` variable (line 248). Given that the EyeLink 1000 Plus has a maximum online recording limit of 60Hz, pupil samples are taken every 17ms. This value may change depending on your hardware - if so, be sure to change the `ms_per_sample` (line 150) to reflect your hardware to ensure that the real-time algorithm performs as expected.
 
 Additionally, if the primary display device is a macOS device with a built-in retina screen, or if you have an external monitor with the "Optimize for Built-in Retina Display" preference setting, ensure that the `use_retina` variable (line 305) is set to `True`.
 
@@ -35,7 +35,7 @@ Alternative versions of this task may include the presentation of stimulus when 
 
 ## Additional Eye-tracker settings
 
-The default calibration used for this code is HV9, using a button box connected to the host PC to accept calibration. By default, calibration sounds are turned off. If you would like to change this for any reason, see lines 237-365 for these settings.
+The default calibration used for this code is HV9 (i.e., 9 calibration points). By default, calibration sounds are turned off. If you would like to change this for any reason, see lines 237-365 for these settings.
 
 ## Outputs
 
