@@ -1,4 +1,4 @@
-# rtPupil
+# rtPupilPhase
 
 This code runs real-time pupillometry script in Pyschopy.
 
