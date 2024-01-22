@@ -1,6 +1,6 @@
 # rtPupilPhase
 
-This is a repository for code associated with [Kronemer et al., 2024](link).
+This is a repository for code associated with [Kronemer et al., 2024](new link).
 
 This repository includes two main parts:
 
