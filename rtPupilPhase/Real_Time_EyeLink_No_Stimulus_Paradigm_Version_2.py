@@ -557,10 +557,23 @@ class rtPupilPhase():
         self._idx_event = 0
 
     def accepted_pupil_event(self):
-        """Log an accepted pupil event (i.e., event detected beyond the inter-event interval"""
-        """Note: This function can be used for building closed-loop paradigms where"""
-        """detect pupil phase events trigger a task event."""
-        
+        """
+        Log an accepted pupil event (i.e., event detected beyond the inter-event interval
+        Note: This function can be used for building closed-loop paradigms where
+        detect pupil phase events trigger a task event.
+
+        PARAMETERS
+            self
+            Interacting with the globals:
+            logging
+            el_tracker
+            pupil_phase_IEI_time 
+        OUTPUTS
+            Changes self._accepted_pupil_event_bool to True
+            Resets pupil_phase_IEI_time
+            Logs to messages
+        """
+
         # Log
         logging.log(level=logging.EXP,msg='Accepted Pupil Event')
         el_tracker.sendMessage('Accepted Pupil Event')
