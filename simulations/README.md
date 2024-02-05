@@ -10,7 +10,7 @@ This directory includes scripts that can be used to simulate human, macaque and 
 - Statistics and Machine Learning Toolbox
 - Curve Fitting Toolbox
 
-Additionally, these scripts require helper functions, which are provided in the `utils` directory. Please ensure that these files are available, or that you change the paths to in the scripts as necessary.
+Additionally, these scripts require a helper function, (`stublinks.m`) which should be placed in a `utils` directory (or alternatively, please ensure that you change the paths in the scripts to reflect your directory structure). This file can be downloaded directly from the [author's website](https://sites.pitt.edu/~gsiegle/); please see [the publication](https://www.sciencedirect.com/science/article/abs/pii/S1053811903002982?via%3Dihub) for more information about the methods in this function.
 
 ## Data
 
