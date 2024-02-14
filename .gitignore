@@ -1,3 +1,6 @@
+simulations/utils/license.txt
+simulations/utils/naninterp.m
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
