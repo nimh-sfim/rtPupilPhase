@@ -10,7 +10,13 @@ This directory includes scripts that can be used to simulate human, macaque and 
 - Statistics and Machine Learning Toolbox
 - Curve Fitting Toolbox
 
-Additionally, these scripts require a helper function, (`stublinks.m`) which should be placed in a `utils` directory (or alternatively, please ensure that you change the paths in the scripts to reflect your directory structure). This file can be downloaded directly from the [author's website](https://sites.pitt.edu/~gsiegle/); please see [the publication](https://www.sciencedirect.com/science/article/abs/pii/S1053811903002982?via%3Dihub) for more information about the methods in this function.
+Additionally, sections of these scripts identify blinks and microsaccades for further analyses of the pupillometry traces. For this section of the simulations to work, three additional scripts are necessary: 
+
+- `Stublinks60`, which is baesd off of [publically available code](https://sites.pitt.edu/~gsiegle/); please see [the publication](https://www.sciencedirect.com/science/article/abs/pii/S1053811903002982?via%3Dihub) for more information about these methods.  
+- `GetMicrosaccadesEK` to identify saccades and microsaccades. This code is not directly provided. 
+-  `naninterp`, which can be downloaded from the [MATLAB File Exchange](https://www.mathworks.com/matlabcentral/fileexchange/8225-naninterp) and should be placed in the utils directory (or added to the MATLAB path in an alternative manner. 
+
+As the simulations are written, these functions should be placed in the `utils` directory. Alternatively, place them in your location of choice and update the code to add them to the path. It is important to note, however, that these functions are not necessary for the main pupil phase detection algorithm and the code can be adjusted to not require these functions. 
 
 ## Data
 
@@ -39,3 +45,5 @@ The following outputs will be saved for each subject:
 
 - a text file containing the total number and number of accepted identified events (dilations, peaks, constrictions, troughs and random).
 - figures plotting all epochs for each kind of pupil event, mean time course of each kind of pupil event, and the mean timecourse surrounding blinks.
+
+Note that there may be slight differences between the simulated traces and the traces identified in the real-time algorithm because of small differences in MATLAB vs Python (see manuscript for details).

@@ -2,13 +2,13 @@
 
 This code runs real-time pupillometry script in Pyschopy.
 
-In brief, this code streams in the pupillometry data as it is read by the eye-tracker and determines the phase of the pupil. For details about the algorithm used to determine pupil phase, please see [Kronemer et al., 2024](link).
+In brief, this code streams in the pupillometry data as it is read by the eye-tracker and determines the phase of the pupil. For details about the algorithm used to determine pupil phase, please see [Kronemer et al., 2024](https://biorxiv.org/cgi/content/short/2024.02.12.579393v1).
 
 ## Requirements
 
 - Python 3.6+
 - [PsychoPy](https://www.psychopy.org/): version 2022.2.4
-- if on a Mac or a Linux system, Eyelink Developers Kit is also necessary to work with PsychoPy - see the SR Research support site for more information. 
+- if on a Mac or a Linux system, Eyelink Developers Kit is also necessary to work with PsychoPy - see the SR Research support site for more information.
   - running this script in PsychoPy will fail if you have not included `EyeLinkCoreGraphicsPsychoPy.py`, `error.wav`, `type.wav` and `qbeep.wav` in the directory with this script. These files can be found in any of the PsychoPy Coder examples that are provided with the Eyelink Developers Kit.
 
 This script additionally requires the following Python packages:

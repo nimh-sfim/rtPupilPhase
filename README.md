@@ -1,11 +1,13 @@
 # rtPupilPhase
 
-This is a repository for code associated with [Kronemer et al., 2024](new link).
+This is a repository for code associated with [Kronemer et al., 2024](https://biorxiv.org/cgi/content/short/2024.02.12.579393v1).
 
 This repository includes two main parts:
 
 - Psychopy code associated with collecting real-time pupillometry data. This includes a fixation task where pupil events (peak, trough, dilation, constriction) are identified in real-time and recorded. This code could be extended to include the presentation of a stimulus upon the detection of a given pupil event, for example.
 - Simulated real-time pupillometry. This includes a MATLAB script that reads in pupillometry data that has been collected offline and is processed as though it were collected in real-time.
+
+Additional changes may occur as the manuscript goes through the peer review process. 
 
 ## Real-time Pupillometry
 
