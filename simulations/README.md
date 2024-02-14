@@ -12,7 +12,7 @@ This directory includes scripts that can be used to simulate human, macaque and 
 
 Additionally, sections of these scripts identify blinks and microsaccades for further analyses of the pupillometry traces. For this section of the simulations to work, three additional scripts are necessary: 
 
-- `Stublinks60`, which is baesd off of [publically available code](https://sites.pitt.edu/~gsiegle/); please see [the publication](https://www.sciencedirect.com/science/article/abs/pii/S1053811903002982?via%3Dihub) for more information about these methods.  
+- `Stublinks60`, which is based off of [publically available code](https://sites.pitt.edu/~gsiegle/); please see [the publication](https://www.sciencedirect.com/science/article/abs/pii/S1053811903002982?via%3Dihub) for more information about these methods.  
 - `GetMicrosaccadesEK` to identify saccades and microsaccades. This code is not directly provided. 
 -  `naninterp`, which can be downloaded from the [MATLAB File Exchange](https://www.mathworks.com/matlabcentral/fileexchange/8225-naninterp) and should be placed in the utils directory (or added to the MATLAB path in an alternative manner. 
 
