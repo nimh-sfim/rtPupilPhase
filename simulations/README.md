@@ -12,8 +12,8 @@ This directory includes scripts that can be used to simulate human, macaque and 
 
 Additionally, sections of these scripts identify blinks and microsaccades for further analyses of the pupillometry traces. For this section of the simulations to work, three additional scripts are necessary: 
 
-- `Stublinks60`, which is a wrapper for functions in `stublinks.m`. The original `stublinks.m` file is [publically available code](https://sites.pitt.edu/~gsiegle/) and should be downloaded as well; please see [the publication](https://www.sciencedirect.com/science/article/abs/pii/S1053811903002982?via%3Dihub) for more information about these methods.  
-- `GetMicrosaccadesEK` to identify saccades and microsaccades. This code is not directly provided. 
+- `Stublinks60`, which is a wrapper for functions in `stublinks.m`. The original `stublinks.m` file is [publicly available code](https://sites.pitt.edu/~gsiegle/) and should be downloaded as well; please see [the publication](https://www.sciencedirect.com/science/article/abs/pii/S1053811903002982?via%3Dihub) for more information about these methods.  
+- `GetMicrosaccadesEK` to identify saccades and microsaccades. This function is based off of this [publicly available code](https://github.com/sj971/neurosci-saccade-detection/blob/master/analyzeEyeData.m), roughly based on approaches such as [Engbert & Kliegl (2003)](https://pubmed.ncbi.nlm.nih.gov/12676246/)
 -  `naninterp`, which can be downloaded from the [MATLAB File Exchange](https://www.mathworks.com/matlabcentral/fileexchange/8225-naninterp) and should be placed in the utils directory (or added to the MATLAB path in an alternative manner. 
 
 As the simulations are written, these functions should be placed in the `utils` directory. Alternatively, place them in your location of choice and update the code to add them to the path. It is important to note, however, that these functions are not necessary for the main pupil phase detection algorithm and the code can be adjusted to not require these functions. 
