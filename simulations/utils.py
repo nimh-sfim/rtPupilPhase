@@ -27,6 +27,15 @@ def get_data(sub_dir, num_blocks = 5, recorded_eye=1):
 
     return all_data, event_data
 
+def find_string_time(time_array, message_array, match_string):
+    for idx, item in enumerate(message_array):
+        if item.size > 0:
+            if item == match_string:
+                break
+
+    time = time_array[idx][0][0]
+    return time
+
 def pull_pupil_sample(data, pupil_sample_num, samples_in_pupil_sample): 
     if pupil_sample_num ==0: 
         current_pupil_sample = data[0:2, 0:int(samples_in_pupil_sample)]
@@ -34,7 +43,9 @@ def pull_pupil_sample(data, pupil_sample_num, samples_in_pupil_sample):
         current_pupil_sample = data[0:2, int(pupil_sample_num*samples_in_pupil_sample):int((pupil_sample_num+1)*samples_in_pupil_sample)]
     return current_pupil_sample
 
-def plot_mean_timecourses(half_epoch_duration, title = "", peak_epoch=None, trough_epoch=None, constriction_epoch=None, dilation_epoch=None, random_epoch=None):
+def plot_mean_timecourses(half_epoch_duration, title = "", peak_epoch=None, 
+                          trough_epoch=None, constriction_epoch=None, dilation_epoch=None, 
+                          random_epoch=None, save_dir = None):
     
     time_vector = range(-half_epoch_duration, half_epoch_duration+1)
     plt.axhline(y=0, color='silver')
@@ -63,5 +74,7 @@ def plot_mean_timecourses(half_epoch_duration, title = "", peak_epoch=None, trou
         plt.plot(time_vector, mean_random_epoch, color="limegreen", label="Random")
     plt.legend()
     plt.title(title)
+
+    if save_dir is not None: 
+        plt.savefig(save_dir)
     plt.show()
-    

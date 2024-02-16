@@ -1,26 +1,19 @@
 import numpy as np 
-#from scipy.signal import find_peaks 
 import os 
-#import matplotlib.pyplot as plt
-#from scipy.io import loadmat
 import pickle
 
-from utils import get_data, pull_pupil_sample, plot_mean_timecourses
+from utils import get_data, find_string_time, pull_pupil_sample, plot_mean_timecourses
 from StimulusDecider import StimulusDecider
 from EventCollector import EventCollector
 
 # Dictionary:
 # ms = milliseconds
 # IEI = inter-event interval
-# num = number
-# EyeLink = the pupillometry system (SR Research, Inc.)
-# idx = index
 
 # *** Subject and Recording Parameters ***
 
 # Subject list
-#subject_list = ['046','048','073','074','078','079','080','081']
-subject_list = ['048']
+subject_list = ['046','048','073','074','078','079','080','081']
 
 # The recorded eye (0 = left; 1 = right)
 # Note: EyeLink stores the pupil size data in a 2 x time/sample matrix. The
@@ -37,6 +30,7 @@ ms_per_sample = 17 # EyeLink live recording rate is (60Hz or ~17 samples/s)
 downsample_value = 17 # Downsample value
 
 # *** Display Parameters ***
+# These may be necessary for calculating blinks, saccades and microsaccades
 
 # Display monitor information
 monitor_height = 1024 # in pixels
@@ -69,20 +63,13 @@ max_search_window_length_ms = 5000 # in milliseconds
 
 # *** Other Parameters ***
 
-# Warning flag (1 = yes; 0 = no)
-# Note: There are multiple warnings scripted throughout the simulation that
-# can help keep track of the simulation progress. However, for a cleaner
-# terminal, you can supress these warnings. Scripted errors are not
-# impacted by the warning flag.
-warning_flag = 0
-
-# 50# of the epoch length to be extracted
+# 50# of the epoch length to be extracted - use 50% so that can plot both before and after event
 half_epoch_duration_ms = 2500 # in milliseconds
 
 # No blinks or saccades interval
 no_blinks_saccades = 500 # in milliseconds
 
-# definepaths 
+# define paths 
 root_path = os.getcwd()
 data_base = os.path.join(root_path,"simulations", "data","human")
 results_base = os.path.join(root_path, "simulations", "analysis", "subject_analysis","human")
@@ -107,16 +94,21 @@ for subjID in subject_list:
     for block in range(1,num_blocks+1): 
         print("Starting block "+str(block))
 
+        # initialize Event Collectors 
         random_events = EventCollector("random")
         trough_events = EventCollector("trough")
         peak_events = EventCollector("peak")
         constriction_events = EventCollector("constriction")
         dilation_events = EventCollector("dilation")
         accepted_pupil_event_times = []
+        
+        # pull the data for a block - we're just going to look block by block 
 
-        start_time = event_data['sttime'][0][np.where(event_data['message'] == ["Starting Perception Rate Block "+str(block)])[1][0]][0][0]
-        end_time = event_data['sttime'][0][np.where(event_data['message'] == ["Finished Perception Rate Block "+str(block)])[1][0]][0][0]
-
+        start_time = find_string_time(time_array = event_data['sttime'][0], message_array = event_data['message'], 
+                                      match_string="Starting Perception Rate Block "+str(block))
+        end_time = find_string_time(time_array = event_data['sttime'][0], message_array = event_data['message'], 
+                                      match_string="Finished Perception Rate Block "+str(block))
+        
         block_data = gaze_data[:,np.where(gaze_data[0]==start_time)[0][0]:np.where(gaze_data[0]==end_time)[0][0]]
         
         # Downsampling matches th Eyelink real-time sampling in a live testing session
@@ -137,7 +129,7 @@ for subjID in subject_list:
                 else: 
                     sd.reset_baseline_window()
 
-            # validate search window 
+            # validate search window - not too long, no blinks
             if sd.validate_search_window(max_search_window_length_ms/ms_per_sample)==0:
                 sd.reset_search_window()
 
@@ -146,6 +138,7 @@ for subjID in subject_list:
             # demean search window 
             demeaned_search_window = sd.get_search_window() - np.mean(sd.get_search_window())
 
+            # Fit data in search window with polynomial function 
             sd.fit_polynomial(demeaned_search_window)
 
             # stage 4: find pupil events 
@@ -159,26 +152,37 @@ for subjID in subject_list:
                 # ensures that the first stimulus always triggers accepted random event
                 time_from_last_event = random_IEI
 
+            # if it's been enough time, log a random event 
             if time_from_last_event >= random_IEI:
                 random_events.update_data(((pupil_sample_num+1)*samples_in_pupil_sample), current_time, 
                                         sd.get_search_window()[-1])
             
             # find pupil phase events 
             if len(sd.get_search_window()) > 1:
-                found_event = sd.find_pupil_phase_event(pupil_sample_num=pupil_sample_num, current_time=current_time, peak_events=peak_events, 
-                trough_events=trough_events, constriction_events=constriction_events, 
-                dilation_events=dilation_events)
+                # check if there was an event 
+                found_event = sd.find_pupil_phase_event(pupil_sample_num=pupil_sample_num, current_time=current_time, 
+                                                        peak_events=peak_events, trough_events=trough_events, 
+                                                        constriction_events=constriction_events, dilation_events=dilation_events)
+                
+                # update internal tracking of events 
                 sd.set_current_event_idx(found_event)
 
+                # get times for all events (regardless of type) 
                 event_times = peak_events.get_times() + trough_events.get_times() +  constriction_events.get_times() + dilation_events.get_times()
                 event_times.sort()
 
+                # if there is an event, check to see whether enough time has passed to consider it an accepted event
+                # events get logged in respective EventCollector objects 
                 if found_event != 0:
                     peak_events, trough_events, dilation_events, constriction_events = sd.validate_event_offline(event_times, accepted_pupil_event_times, IEI_jitter_ms, 
                                             peak_events, trough_events, dilation_events, constriction_events)
                     
-            
-        # pull epoch data         
+        
+        # Note that it may be recommended to perform additional blink and microsaccade detection using your method of choice here. 
+        # In the MATLAB simulations, we interpolate over blinks and use a method to identify microsaccades based off of Engbert & Kliegl (2003)     
+        # Here, we do not perform this data processing and simply plot the data. 
+
+        # pull epoch data for each event and concatentate across block 
         if block == 1:
             accepted_constriction_epoch_data, all_constriction_epoch_data = constriction_events.pull_valid_epochs(block_data[1,:], half_epoch_duration_ms, ms_per_sample, False)
             accepted_dilation_epoch_data, all_dilation_epoch_data = dilation_events.pull_valid_epochs(block_data[1,:], half_epoch_duration_ms, ms_per_sample, False)
@@ -206,7 +210,7 @@ for subjID in subject_list:
             block_all_random_epoch_data, _ = random_events.pull_valid_epochs(block_data[1,:], half_epoch_duration_ms, ms_per_sample, True) 
             all_random_epoch_data = np.append(all_random_epoch_data, block_all_random_epoch_data, axis=1)
 
-    # # save subject level data
+    # save subject level data
     save_dict = {"accepted_peak_epochs": accepted_peak_epoch_data, 
                 "accepted_trough_epochs": accepted_trough_epoch_data,
                 "accepted_dilation_epochs": accepted_dilation_epoch_data, 
@@ -221,36 +225,17 @@ for subjID in subject_list:
     with open(outfile, 'wb') as pickle_file:
         pickle.dump(save_dict, pickle_file)
 
+    # plot mean time courses for each subject - accepted and all events 
     plot_mean_timecourses(half_epoch_duration=half_epoch_duration_ms, title = "Accepted events - subject "+subjID, 
                      peak_epoch = accepted_peak_epoch_data, trough_epoch = accepted_trough_epoch_data, 
                      constriction_epoch = accepted_constriction_epoch_data, dilation_epoch = accepted_dilation_epoch_data, 
-                     random_epoch = all_random_epoch_data)
+                     random_epoch = all_random_epoch_data, save_dir= os.path.join(results_dir, "accepted_trace.png"))
     
     plot_mean_timecourses(half_epoch_duration=half_epoch_duration_ms, title = "All events - subject "+subjID, 
                      peak_epoch = all_peak_epoch_data, trough_epoch = all_trough_epoch_data, 
                      constriction_epoch = all_constriction_epoch_data, dilation_epoch = all_dilation_epoch_data, 
-                     random_epoch = all_random_epoch_data)
+                     random_epoch = all_random_epoch_data, save_dir= os.path.join(results_dir, "all_trace.png"))
 
 
 # TODO: refactor real-time code 
 # TODO: documentation 
-
-
-                            
-
-
-
-
-
-
-
-             
-
-        
-
-        
-
-    
-
-
-
