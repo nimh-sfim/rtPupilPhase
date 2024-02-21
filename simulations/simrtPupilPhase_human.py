@@ -14,7 +14,6 @@ from EventCollector import EventCollector
 
 # Subject list
 subject_list = ['046','048','073','074','078','079','080','081']
-
 # The recorded eye (0 = left; 1 = right)
 # Note: EyeLink stores the pupil size data in a 2 x time/sample matrix. The
 # first row = the left eye and the second row = the right eye.
@@ -22,12 +21,12 @@ recorded_eye = 1
 
 # Number of task blocks completed per participant
 num_blocks = 5
-block_duration_ms = 600000 # in milliseconds
+block_duration_ms = 600000 # duration of in milliseconds
 
 # Define pupillometry sampling rate
 sampling_rate = 1000 # in Hz
 ms_per_sample = 17 # EyeLink live recording rate is (60Hz or ~17 samples/s)
-downsample_value = 17 # Downsample value
+downsample_value = 17 # Downsample value - to make offline recording match live-stream recording rate
 
 # *** Display Parameters ***
 # These may be necessary for calculating blinks, saccades and microsaccades
@@ -86,11 +85,15 @@ for subjID in subject_list:
     # time, pupil size, x coord, y coord
     gaze_data, event_data = get_data(sub_dir)
 
+    # if output directory doesn't exist, create it 
     if not os.path.isdir(results_dir):
         os.makedirs(results_dir) 
 
+    # create stimulus decider object 
     sd = StimulusDecider("fixation")
 
+    # identify events across block - this matters because we care about the ends of blocks. 
+    # event epochs are concatenated across blocks at end of loop 
     for block in range(1,num_blocks+1): 
         print("Starting block "+str(block))
 
@@ -102,11 +105,11 @@ for subjID in subject_list:
         dilation_events = EventCollector("dilation")
         accepted_pupil_event_times = []
         
-        # pull the data for a block - we're just going to look block by block 
+        # pull the raw data for a block 
 
-        start_time = find_string_time(time_array = event_data['sttime'][0], message_array = event_data['message'], 
+        start_time = find_string_time(time_array = event_data['sttime'][0], message_array = event_data['message'][0], 
                                       match_string="Starting Perception Rate Block "+str(block))
-        end_time = find_string_time(time_array = event_data['sttime'][0], message_array = event_data['message'], 
+        end_time = find_string_time(time_array = event_data['sttime'][0], message_array = event_data['message'][0], 
                                       match_string="Finished Perception Rate Block "+str(block))
         
         block_data = gaze_data[:,np.where(gaze_data[0]==start_time)[0][0]:np.where(gaze_data[0]==end_time)[0][0]]
@@ -115,6 +118,7 @@ for subjID in subject_list:
         # goes from 1000Hz to 60Hz 
         downsampled_block_data = block_data[:, 0::downsample_value]
 
+        # ensures we only look at complete pupil samples 
         for pupil_sample_num in range(int(np.shape(downsampled_block_data)[1]/6)-1):
             # stage 1: get pupil sample 
             current_pupil_sample = pull_pupil_sample(downsampled_block_data, pupil_sample_num, samples_in_pupil_sample)
@@ -122,15 +126,15 @@ for subjID in subject_list:
             # stage 2: create search window 
             sd.update_windows(current_pupil_sample)
 
-            # if the baseline window is long enough (and not all nans), update thresholds
+            # if the baseline window is long enough (and not all nans), update thresholds so we account for drift
             if len(sd.get_baseline_window()) > samples_in_baseline_window:
                 if not np.isnan(sd.get_baseline_window()).all(): 
-                    sd.set_pupil_phase_thresholds(sd.get_baseline_window())
+                    sd.set_pupil_phase_thresholds()
                 else: 
                     sd.reset_baseline_window()
 
             # validate search window - not too long, no blinks
-            if sd.validate_search_window(max_search_window_length_ms/ms_per_sample)==0:
+            if not sd.validate_search_window(max_search_window_length_ms/ms_per_sample):
                 sd.reset_search_window()
 
                 continue
@@ -138,7 +142,7 @@ for subjID in subject_list:
             # demean search window 
             demeaned_search_window = sd.get_search_window() - np.mean(sd.get_search_window())
 
-            # Fit data in search window with polynomial function 
+            # Fit demeaned data in search window with polynomial function 
             sd.fit_polynomial(demeaned_search_window)
 
             # stage 4: find pupil events 
@@ -169,7 +173,7 @@ for subjID in subject_list:
 
                 # get times for all events (regardless of type) 
                 event_times = peak_events.get_times() + trough_events.get_times() +  constriction_events.get_times() + dilation_events.get_times()
-                event_times.sort()
+                event_times.sort() # make sure they're in order
 
                 # if there is an event, check to see whether enough time has passed to consider it an accepted event
                 # events get logged in respective EventCollector objects 
@@ -210,7 +214,7 @@ for subjID in subject_list:
             block_all_random_epoch_data, _ = random_events.pull_valid_epochs(block_data[1,:], half_epoch_duration_ms, ms_per_sample, True) 
             all_random_epoch_data = np.append(all_random_epoch_data, block_all_random_epoch_data, axis=1)
 
-    # save subject level data
+    # save subject level data across all blocks
     save_dict = {"accepted_peak_epochs": accepted_peak_epoch_data, 
                 "accepted_trough_epochs": accepted_trough_epoch_data,
                 "accepted_dilation_epochs": accepted_dilation_epoch_data, 
@@ -235,7 +239,3 @@ for subjID in subject_list:
                      peak_epoch = all_peak_epoch_data, trough_epoch = all_trough_epoch_data, 
                      constriction_epoch = all_constriction_epoch_data, dilation_epoch = all_dilation_epoch_data, 
                      random_epoch = all_random_epoch_data, save_dir= os.path.join(results_dir, "all_trace.png"))
-
-
-# TODO: refactor real-time code 
-# TODO: documentation 

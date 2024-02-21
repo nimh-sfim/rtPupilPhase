@@ -3,7 +3,33 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.io import loadmat
 
-def get_data(sub_dir, num_blocks = 5, recorded_eye=1): 
+def get_data(sub_dir, recorded_eye=1): 
+    """
+    Find and load eye-tracking data
+
+    Parameters
+    ----------
+    sub_dir : str
+         directory where .mat file is located  
+    recorded_eye : int
+         column of data to pull data from. For Eyelink data, 0 = left eye, 1 = right eye 
+
+    Returns
+    -------
+    all_data : numpy.ndarray 
+        array of eye-tracking data of dimensions (4, number of timepoints). 
+        Rows reflect time (ms), pupil size (pixels), gaze X location, gaze Y location
+    event_data : numpy.ndarray)
+        array of messages from EyeLink events, with dimension (2, number of events)
+        Rows reflect the message sent to the EyeLink and the time (ms) associated with message. 
+
+    Raises
+    ------
+    AssertionError 
+        More than one pupil data file found in subject directory 
+    Assertion Error
+        Fewer than 10 unique values in pupillometry data, suggesting incorrect eye used 
+    """
     edf_files =  [x for x in os.listdir(sub_dir) if x.endswith(".mat")]
     
     assert len(edf_files) ==1, "More than one pupil data file found!"
@@ -28,15 +54,59 @@ def get_data(sub_dir, num_blocks = 5, recorded_eye=1):
     return all_data, event_data
 
 def find_string_time(time_array, message_array, match_string):
+    """
+    Find the time in ms of a given event, when there are empty arrays 
+
+    Parameters
+    ----------
+    time_array : numpy.ndarray
+        array of timestamps associated with messages
+    message_array : numpy.ndarray
+        array of messages to search against
+    match_string : str
+        the string to find
+
+    Returns
+    -------
+    int 
+        Time (ms) of event matching inputted string
+
+    Raises
+    ------
+    ValueError
+        Message does not exist in array 
+    
+    """
+    item_idx = None
     for idx, item in enumerate(message_array):
         if item.size > 0:
             if item == match_string:
-                break
-
-    time = time_array[idx][0][0]
-    return time
+                item_idx = idx
+    
+    if item_idx is None:
+        raise ValueError("String does not exist in array")
+    else:   
+        time = time_array[item_idx][0][0]
+        return time
 
 def pull_pupil_sample(data, pupil_sample_num, samples_in_pupil_sample): 
+    """
+    Pull a specific pupil sample from gaze data 
+    
+    Parameters
+    ----------
+    data : numpy.ndarray
+        downsampled eyetracking data from block. First 2 rows should be time, pupil size data
+    pupil_sample_num : int
+        which pupil sample to pull
+    samples_in_pupil_sample : int
+        how many pupil size readings are in each pupil sample
+
+    Returns
+    -------
+    numpy.ndarray 
+        extracted pupil sample 
+    """
     if pupil_sample_num ==0: 
         current_pupil_sample = data[0:2, 0:int(samples_in_pupil_sample)]
     else: 
@@ -46,6 +116,44 @@ def pull_pupil_sample(data, pupil_sample_num, samples_in_pupil_sample):
 def plot_mean_timecourses(half_epoch_duration, title = "", peak_epoch=None, 
                           trough_epoch=None, constriction_epoch=None, dilation_epoch=None, 
                           random_epoch=None, save_dir = None):
+    """
+    Plot the mean epoch timecourses. Will plot as many event types as is provided. 
+    Must provide labeled arguments to ensure that the color legend is correct. 
+
+    Parameters
+    ----------
+    half_epoch_duration : int
+        duration (ms) of half an epoch to plot (i.e. how much time before and after evenbt)
+    title : str
+        title of the plot
+    peak_epoch : numpy.ndarray
+        array of peak event epochs to average and plot. 
+        Should be dimensions (# of events x 2*half_epoch_duration + 1)
+    trough_epoch : numpy.ndarray
+        array of trough event epochs to average and plot. 
+        Should be dimensions (# of events x 2*half_epoch_duration + 1)
+    constriction_epoch : numpy.ndarray
+        array of constriction event epochs to average and plot. 
+        Should be dimensions (# of events x 2*half_epoch_duration + 1)
+    dilation_epoch : numpy.ndarray
+        array of dilation event epochs to average and plot. 
+        Should be dimensions (# of events x 2*half_epoch_duration + 1)
+    random_epoch : numpy.ndarray
+        array of random event epochs to average and plot. 
+        Should be dimensions (# of events x 2*half_epoch_duration + 1)
+    save_dir : str
+        directory to save plot as a .png file
+
+    Returns
+    -------
+    Plot saved as .png, if `save_dir` is provided
+
+    Raises
+    -------
+    Assertion Error 
+        epoch duration does not match the length of half epoch duration
+    
+    """
     
     time_vector = range(-half_epoch_duration, half_epoch_duration+1)
     plt.axhline(y=0, color='silver')
