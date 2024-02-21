@@ -1,6 +1,8 @@
 simulations/utils/license.txt
 simulations/utils/naninterp.m
-
+simulations/utils/stublinks.m
+simulations/analysis/subject_analysis/*
+simulations/testing.ipynb
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
