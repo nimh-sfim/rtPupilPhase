@@ -10,7 +10,7 @@
 % may be required when testing alternative data sets. 
 
 % Written by: Sharif I. Kronemer
-% Last Modified: 12/27/2023
+% Last Modified: 2/20/2024
 
 clear all
 
@@ -24,7 +24,6 @@ root_path = pwd;
 % Add paths (Note: Paths are added that houses functions used for pupil
 % preprocessing and extracting saccade and microsaccade occurrences)
 addpath(fullfile(root_path,'utils'))
-%addpath(genpath(fullfile(root_path,'Real_Time_Perception_Study/Analysis/Analysis_Code/EyeLink_Analysis')))
 
 %% Parameters
 
@@ -475,14 +474,18 @@ for human = 1:length(subject_list)
             %% Stage 3 - Model search window pupil data with polynomial fit
         
             % Setup fitting sample vector
+            % Note: Slighty different results will be produced if the
+            % search window sample vector begins at 0 versus 1; Results
+            % reported in Kronemer et al., 2024 were achieved using 1 as
+            % the onset value. 
             search_window_sample_vector = 1:length(search_window_pupil);
-        
+
             % Demean search window
             demean_search_window_pupil = search_window_pupil - mean(search_window_pupil,"omitnan"); 
         
             % Fit data with a polynomial function
             search_window_fit = fit(search_window_sample_vector',double(demean_search_window_pupil'),'poly2');
-        
+
             % Find the last pupil size value of the fitted curve
             fit_value = search_window_fit(length(search_window_pupil));
     
@@ -685,10 +688,7 @@ for human = 1:length(subject_list)
             end
         
         end
-    
-        % Rename pupil data to affiliate with block
-        eval(['Block_',num2str(block),'_pupil_data = all_block_pupil_data;'])
-        
+
         %% Pupil Data Preprocessing
         
         % Pupil conversion value
@@ -1149,8 +1149,8 @@ for human = 1:length(subject_list)
     % Plot pupil timecourses
     plot(timevector, mean_accepted_peak_event_pupil_epochs,'r','LineWidth',2)
     plot(timevector, mean_accepted_trough_event_pupil_epochs,'b','LineWidth',2) 
-    plot(timevector, mean_accepted_rising_event_pupil_epochs,'m','LineWidth',2)
-    plot(timevector, mean_accepted_falling_event_pupil_epochs,'c','LineWidth',2)
+    plot(timevector, mean_accepted_dilation_event_pupil_epochs,'m','LineWidth',2)
+    plot(timevector, mean_accepted_constriction_event_pupil_epochs,'c','LineWidth',2)
     plot(timevector, mean_accepted_random_event_pupil_epochs,'g','LineWidth',2)
     
     % Save figure
@@ -1179,8 +1179,8 @@ for human = 1:length(subject_list)
     % Plot blink timecourses
     plot(timevector, mean_accepted_peak_event_blink_epochs,'r','LineWidth',2)
     plot(timevector, mean_accepted_trough_event_blink_epochs,'b','LineWidth',2)
-    plot(timevector, mean_accepted_rising_event_blink_epochs,'m','LineWidth',2)
-    plot(timevector, mean_accepted_falling_event_blink_epochs,'c','LineWidth',2)
+    plot(timevector, mean_accepted_dilation_event_blink_epochs,'m','LineWidth',2)
+    plot(timevector, mean_accepted_constriction_event_blink_epochs,'c','LineWidth',2)
     plot(timevector, mean_accepted_random_event_blink_epochs,'g','LineWidth',2)
     
     % Save figure
