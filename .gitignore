@@ -3,6 +3,8 @@ simulations/analysis/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
+.pytest_cache
+.vscode
 *.py[cod]
 *$py.class
 
