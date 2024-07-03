@@ -29,6 +29,9 @@ from scipy.signal import find_peaks
 from EyeLinkCoreGraphicsPsychoPy import EyeLinkCoreGraphicsPsychoPy
 from string import ascii_letters, digits
 
+from PsychoPy_funcs import *
+from StimulusDecider import StimulusDecider
+
 # ***************************
 # ******* USER INPUTS *******
 # ***************************
@@ -133,6 +136,7 @@ instructions = visual.TextStim(win, text='', color='white', pos=[0, 2])  #This i
 
 # Maximum number of blocks (before quitting task)
 max_num_blocks = 10 
+block_duration_sec = 600
 
 # *******************
 # *** TASK TIMERS ***
@@ -345,7 +349,7 @@ def main():
     global task_name
     
     # Setup classes
-    sd = rtPupilPhase(task_name) # sets up stimulus decider object
+    sd = StimulusDecider(task_name) # sets up stimulus decider object
     
     # *********************
     # *** Setup EyeLink ***
@@ -507,7 +511,7 @@ def main():
             sd.build_search_window()
 
             # Look for pupil phase events
-            decision_arr.append(sd.detect_events())
+            decision_arr.append(sd.detect_events_online())
         
         # Log
         logging.log(level=logging.EXP,msg='All pupil_sample Duration Times: ' + str(sd.get_pupil_sample_duration_time()))

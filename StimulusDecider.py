@@ -3,6 +3,7 @@ from scipy.signal import find_peaks
 from psychopy import logging
 import pylink
 
+from PsychoPy_funcs import quit_task
 
 class StimulusDecider():
     """Object to store data and detect pupil phase events in real time and in simulations 
@@ -578,6 +579,7 @@ class StimulusDecider():
             amount of time (ms) that must have passed to be considered an accepted event 
         
         """
+        el_tracker = pylink.getEYELINK()
         if pupil_phase_IEI_event_timer.getTime() > IEI_jitter_ms/1000: 
             self.accepted_pupil_event() 
             self.reset_search_window()
@@ -741,7 +743,7 @@ class StimulusDecider():
 
         return list(search_window - np.mean(search_window))
 
-    def build_search_window(self, win) -> float:
+    def build_search_window(self) -> float:
         """Add the pupil sample to search window"""
         
         el_tracker = pylink.getEYELINK()
