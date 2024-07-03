@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.signal import find_peaks
 from psychopy import logging
+import pylink
 
 
 class StimulusDecider():
@@ -100,7 +101,11 @@ class StimulusDecider():
     """
     
     def __init__(
-        self,task_name,peak_pupil_quantile=0.75, trough_pupil_quantile=0.25, 
+        self,task_name, ms_per_sample=17, block_duration_sec=600, 
+        baseline_duration_ms=5000, max_search_window_duration_ms=5000,
+        pupil_sample_duration_ms=100, num_random_event=20,
+        IEI_duration_sec=3,
+        peak_pupil_quantile=0.75, trough_pupil_quantile=0.25, 
         dilation_quantile=0.99, constriction_quantile=0.01, 
         peak_threshold_var = 0., trough_threshold_var = 0., dilation_threshold=50., 
         constriction_threshold=-50., online=False
@@ -137,6 +142,15 @@ class StimulusDecider():
         online : boolean 
             whether object is used in real time data collection or in simulations    
         """
+    
+        self._ms_per_sample = ms_per_sample
+        self._baseline_duration_ms = baseline_duration_ms
+        self._max_search_window_duration_ms = max_search_window_duration_ms
+        self._pupil_sample_duration_ms = pupil_sample_duration_ms
+        self._num_random_event = num_random_event
+        self._random_event_time_sec = block_duration_sec/num_random_event
+        self._IEI_duration_sec = IEI_duration_sec
+
         self._prior_search_window = []
         self._search_window_model_fits = []
         self._new_sample = None
@@ -161,6 +175,8 @@ class StimulusDecider():
         self._idx_event = 0
         self._online = online
         self._task_name = task_name
+
+        # CW: only things added are the quantiles, online and task name
 
     def update_windows(self, sample, duration = None): 
         """ 
@@ -265,6 +281,8 @@ class StimulusDecider():
 
         Search window will be reset if it is too long or if there are blinks detected in the 
         current or previous search windows
+
+        #CW: new func - but pulled from detect_events
         
         Parameters
         ----------
@@ -276,6 +294,7 @@ class StimulusDecider():
         boolean 
             whether or not search window was considered valid 
         """
+        # If search window is empty
         if len(self._search_window) == 0:
             self._accepted_pupil_event_bool = False
             return False
@@ -304,6 +323,8 @@ class StimulusDecider():
 
         Pupil sample fit with a second order polynomial and last fitted value from sample is saved 
         to attribute self._search_window_model_fits (list)
+
+        # CW: pulled from find_pupil_phase_event
 
         Parameters
         ----------
@@ -387,7 +408,7 @@ class StimulusDecider():
         or in real-time data collection (in which case self._online = True and event objects should
         be None, as is the default). 
 
-        If event is identified, update self._idx_event to 
+        If event is identified, update self._idx_event to the id of that event.
         
         Parameters
         ----------
@@ -415,6 +436,9 @@ class StimulusDecider():
         """
 
         demeaned_search_window =  list(self._search_window - np.nanmean(self._search_window))
+
+        if self._online: 
+            self.fit_polynomial(demeaned_search_window)
 
         # Diff across fit values if there are more than one fit values
         if len(self._search_window_model_fits) > 1:
@@ -591,6 +615,7 @@ class StimulusDecider():
     def reset_search_window(self):
         """
         Clear search window and associated variables 
+        # CW: new but pulled from detect_events
         """
         self._search_window = []
         self._search_window_sample_times = []
@@ -601,3 +626,180 @@ class StimulusDecider():
     
     def set_current_event_idx(self, found_event): 
         self._idx_event = found_event
+
+    def accepted_pupil_event(self):
+        """
+        Log an accepted pupil event (i.e., event detected beyond the inter-event interval
+        Note: This function can be used for building closed-loop paradigms where
+        detect pupil phase events trigger a task event.
+
+        PARAMETERS
+            self
+            Interacting with the globals:
+            logging
+            el_tracker
+            pupil_phase_IEI_time 
+        OUTPUTS
+            Changes self._accepted_pupil_event_bool to True
+            Resets pupil_phase_IEI_time
+            Logs to messages
+        """
+
+        el_tracker = pylink.getEYELINK()
+
+        # Log
+        logging.log(level=logging.EXP,msg='Accepted Pupil Event')
+        el_tracker.sendMessage('Accepted Pupil Event')
+        
+        # Reset pupil phase IEI timer
+        pupil_phase_IEI_timer.reset()
+        
+        # Set boolean to True
+        self._accepted_pupil_event_bool = True
+
+    def detect_events_online(self): 
+        """
+        
+        """
+        el_tracker = pylink.getEYELINK()
+
+        valid_window = self.validate_search_window(self._max_search_window_duration_ms//self._ms_per_sample)
+        if not valid_window:
+            return 0
+        
+        demeaned_search_window = self.demean_search_window(self._search_window)
+
+        # Reset pupil phase pupil size and pupil size derivative thresholds - once the minimum baseline duration has been acquired
+        if len(self._baseline_window) > round(self._baseline_duration_ms//self._ms_per_sample):
+            self.set_pupil_phase_thresholds(self._baseline_window)
+        
+        # Log random event if the minimum random IEI is exceed      
+        if random_IEI_timer.getTime() > self._random_event_time_sec:
+        
+            # If IEI has been exceed (Note: The IEI timer gets reset in the accepted_pupil_event; 
+            # no reset will happen if no stimulus is shown)
+            if pupil_phase_IEI_timer.getTime() > self._IEI_duration_sec:
+                
+                # Define idx extrema
+                self._idx_event = 3
+                
+                # Log
+                logging.log(level=logging.EXP,msg='Random Event')
+                el_tracker.sendMessage('Random Event') 
+                
+                # Accepted event
+                self.accepted_pupil_event()
+
+                # Reset timers
+                random_IEI_timer.reset()
+                general_timer.reset()
+                
+                return self._idx_event
+            
+            return 0
+        
+        # Find peaks (local maxima), troughs (local minima), dilation (dilation), and constriction (constriction) events
+        # Index extrema dictionary: peak = 1; dilation = 2; trough = -1; constriction = -2; random = 3
+        self._idx_event = self.find_pupil_phase_event(demeaned_search_window)
+        
+        # If a pupil phase event was found
+        if self._idx_event!=0:
+            
+            # Confirm pupil phase IEI exceeded
+            if pupil_phase_IEI_timer.getTime() > self._IEI_duration_sec:
+                
+                # Accepted event
+                self.accepted_pupil_event()
+                
+                # Reset search window 
+                self.reset_search_window()
+                self._idx_event = 0
+            
+            # If IEI is not exceeded 
+            elif pupil_phase_IEI_timer.getTime() < self._IEI_duration_sec:
+                
+                # Not an accepted event
+                self._accepted_pupil_event_bool = False
+                
+                # Log
+                logging.log(level=logging.EXP,msg='Within IEI - Skipping this Pupil Event')
+                el_tracker.sendMessage('Within IEI - Skipping this Pupil Event')
+            
+            # NOTE: search_window is not reset; will continue looking for a pupil phase events after adding another pupil_sample;
+            # unless the search window gets too long
+            
+            # Not an accepted event
+            self._accepted_pupil_event_bool = False
+            return 0
+        
+        # Not an accepted event    
+        self._accepted_pupil_event_bool = False
+        return 0
+    
+    def demean_search_window(search_window: np.array) -> np.ndarray:
+        """Calculate the mean of the pupil_sample and subtract from all data samples."""
+
+        return list(search_window - np.mean(search_window))
+
+    def build_search_window(self, win) -> float:
+        """Add the pupil sample to search window"""
+        
+        el_tracker = pylink.getEYELINK()
+
+        # Initialize/reset pupil_sample variable
+        pupil_sample = []
+        pupil_sample_time = []
+        
+        # Setup pupil size/time variables
+        p_size = float("nan")
+        p_time = float("nan")
+        
+        # Reset pupil sample timer
+        pupil_sample_timer.reset()
+        
+        # Keep adding pupil values until pupil_sample is long enough      
+        while len(pupil_sample) < self._pupil_sample_duration_ms//self._ms_per_sample:
+        
+            # Update window
+            win.update()
+        
+            # Get the latest EyeLink sample        
+            self._new_sample = el_tracker.getNewestSample()
+
+            # Check there is a new pupil value and that it is not the first pupil sample 
+            if self._new_sample is not None and self._old_sample is not None:
+                    
+                # Check the new and old pupil values are not the same
+                if self._new_sample.getTime() != self._old_sample.getTime():
+
+                    # Find the pupil size and time
+                    p_size = self._new_sample.getRightEye().getPupilSize()
+                    p_time = self._new_sample.getTime()
+                    
+                    # Replace pupil size of 0 with "nan"
+                    if p_size == 0:
+                        p_size = float("nan")
+                    
+                    # Add to pupil_sample
+                    pupil_sample.append(p_size) # Add samples to pupil_sample
+                    pupil_sample_time.append(p_time)
+        
+            # Quit task
+            quit_task()
+        
+            # Replace old pupil value with new
+            self._old_sample = self._new_sample
+            
+        # Add pupil sample and pupil sample times to search window and search window sample times 
+        self._search_window.extend(pupil_sample)
+        self._search_window_sample_times.extend(pupil_sample_time)
+        
+        # Store duration of pupil sample in time
+        self._pupil_sample_duration_time.append(pupil_sample_timer.getTime())
+        
+        # Add pupil sample to baseline window
+        self._baseline_window.extend(pupil_sample)
+
+def get_pupil_sample_duration_time(self):
+    """Used to log pupil sample duration array."""
+    return self._pupil_sample_duration_time
