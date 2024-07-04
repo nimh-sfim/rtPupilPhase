@@ -14,6 +14,20 @@ class StimulusDecider():
         name of task to be used with decider 
     online : boolean 
         whether object is used in real time data collection or in simulations
+    ms_per_sample : int 
+        length of a single real-time pupil sample in milliseconds 
+    baseline_duration_ms : int 
+        duration of baseline window in milliseconds 
+    max_search_window_duration_ms : int
+        maximum length of search window before resetting search window (in milliseconds)
+    pupil_sample_duration_ms : int
+        duration of a pupil sample from the eye tracker in real time, in milliseconds 
+    num_random_events : int
+        how many random events per block 
+    random_event_time_sec : int 
+        how long between random events 
+    IEI_duration_sec : int 
+        inter-event interval (i.e. how long should we wait between pupil events), in seconds
     search_window : list
         set of pupil samples to be used to find pupil events 
     search_window_sample_times : list
@@ -75,9 +89,9 @@ class StimulusDecider():
         Update search and baseline windows with values from pupil sample 
     validate_search_window(max_search_window_duration_samples):
         Determine whether search window meets criteria for finding pupil phase events  
-    fit_polynomial(pupil_sample): 
+    fit_polynomial(demeaned_pupil_sample): 
         Do polynomial fit on pupil sample and save final value
-    log_found_event_live(el_tracker, kind, demeaned_search_window, diff_fit):
+    log_found_event_live(kind, demeaned_search_window, diff_fit):
         Interface with eye-tracker to log an event in real-time
     find_pupil_phase_event(pupil_sample_num=float('nan'), samples_in_pupil_sample=6, 
         current_time = float("nan"), peak_events = None, trough_events = None, 
@@ -92,6 +106,25 @@ class StimulusDecider():
         Clear baseline window 
     reset_search_window():
         Clear search window and associated variables
+    accepted_pupil_event(): 
+        Log an accepted pupil event. Function can be used for building closed-loop paradigms where
+        detected pupil events trigger some sort of other task event.
+    detect_events_online():  
+        Detect pupil events in real-time. Validate search window, update pupil phase thresholds (if
+        necessary) and identify pupil phase event in search window. 
+    build_search_window(): 
+        Build baseline and search windows in real-time. 
+    get_pupil_sample_duration_time(): 
+        Used to log pupil sample duration array. 
+    get_search_window(): 
+        accesses pupil samples in currently stored search window 
+    get_search_window_times():
+        accesses times associated with currently stored pupil sample, as the EyeLink eye-tracker 
+        takes samples stochastically. 
+    get_baseline_window(): 
+        accesses current baseline window 
+    get_search_window_fit_vals(): 
+        returns the fitted search window values. 
     
     Notes
     --------
@@ -118,6 +151,20 @@ class StimulusDecider():
         ----------
         task_name: str
             name of task to be used with decider 
+        ms_per_sample : int
+            duration of a given pupil sample in real-time in milliseconds 
+        block_duration_sec : int 
+            number of seconds in a block 
+        baseline_duration_ms : int
+            duration of baseline window in milliseconds 
+        max_search_window_duration_ms : int
+            maximum length of search window in ms
+        pupil_sample_duration_ms : int 
+            duration of real-time pupil sample from eye-tracker in milliseconds              
+        num_random_events : int 
+            number of random events to include per block 
+        IEI_duration_sec : int
+            duration of inter-event interval in seconds 
         peak_pupil_quantile : float 
             quantile threshold for identifying peak values - pupil size must be above this quantile 
             of values in baseline window to be accepted as a peak 
@@ -176,8 +223,6 @@ class StimulusDecider():
         self._idx_event = 0
         self._online = online
         self._task_name = task_name
-
-        # CW: only things added are the quantiles, online and task name
 
     def update_windows(self, sample, duration = None): 
         """ 
@@ -283,8 +328,6 @@ class StimulusDecider():
         Search window will be reset if it is too long or if there are blinks detected in the 
         current or previous search windows
 
-        #CW: new func - but pulled from detect_events
-        
         Parameters
         ----------
         max_search_window_duration_samples :  int
@@ -325,8 +368,6 @@ class StimulusDecider():
         Pupil sample fit with a second order polynomial and last fitted value from sample is saved 
         to attribute self._search_window_model_fits (list)
 
-        # CW: pulled from find_pupil_phase_event
-
         Parameters
         ----------
         demeaned_pupil_sample : list 
@@ -347,16 +388,14 @@ class StimulusDecider():
         # Store the last value of fitting curve
         self._search_window_model_fits = np.append(self._search_window_model_fits,fit_value)
     
-    def log_found_event_live(self, el_tracker, kind, demeaned_search_window, diff_fit): 
+    def log_found_event_live(self, kind, demeaned_search_window, diff_fit): 
         """
         Interface with eye-tracker to log an event in real-time
 
-        Internally, update count of event types. 
+        Internally (i.e. in StimulusDecider object), update count of event types. 
 
         Parameters
         ----------
-        el_tracker : EyeLink object 
-            eye tracker object initialized via PyLink
         kind : str
             kind of event to log 
         demeaned_search_window : np.ndarray 
@@ -364,6 +403,7 @@ class StimulusDecider():
         diff_fit : np.ndarray 
             gradient of search window being fit 
         """
+        el_tracker = pylink.getEYELINK()
         if kind == "trough": 
                 logging.log(level=logging.EXP,msg='Search Window Pupil: ' + str(demeaned_search_window))
                 logging.log(level=logging.EXP,msg='Search Window Sample Time: ' + str(self._search_window_sample_times))
@@ -598,18 +638,6 @@ class StimulusDecider():
         # Not an accepted event
         self._accepted_pupil_event_bool = False              
 
-    def get_search_window(self): 
-        return self._search_window
-    
-    def get_search_window_times(self):
-        return self._search_window_sample_times
-    
-    def get_baseline_window(self):
-        return self._baseline_window
-    
-    def get_search_window_fit_vals(self): 
-        return self._search_window_model_fits
-    
     def reset_baseline_window(self): 
         """ Clear baseline window """
         self._baseline_window = []
@@ -617,7 +645,6 @@ class StimulusDecider():
     def reset_search_window(self):
         """
         Clear search window and associated variables 
-        # CW: new but pulled from detect_events
         """
         self._search_window = []
         self._search_window_sample_times = []
@@ -633,18 +660,12 @@ class StimulusDecider():
         """
         Log an accepted pupil event (i.e., event detected beyond the inter-event interval
         Note: This function can be used for building closed-loop paradigms where
-        detect pupil phase events trigger a task event.
+        detected pupil phase events trigger a task event. In this case, you might have another 
+        PsychoPy function that does some sort of event that is called here. 
 
-        PARAMETERS
-            self
-            Interacting with the globals:
-            logging
-            el_tracker
-            pupil_phase_IEI_time 
-        OUTPUTS
-            Changes self._accepted_pupil_event_bool to True
-            Resets pupil_phase_IEI_time
-            Logs to messages
+        Once an event is accepted, resets global pupil_phase_IEI_time, changes internal 
+        accepted_pupil_event_bool to True and sends a logging event to PsychoPy logs. 
+
         """
 
         el_tracker = pylink.getEYELINK()
@@ -661,7 +682,16 @@ class StimulusDecider():
 
     def detect_events_online(self): 
         """
-        
+        Detect pupil events in real-time. Search window is validated, then pupil phase threshold values are updated. 
+        Once threshold values are updated, determine whether enough time has passed for a random event. If not, 
+        pupil phase events are looked for. If event is identified, reset timers. 
+
+        Returns 
+        ----------
+        int 
+            integer reflecting kind of event detected. 1 = peak, -1 = trough, 
+            2 = dilation, -2 = constriction, 3 = random event, 0 = no event 
+
         """
         el_tracker = pylink.getEYELINK()
 
@@ -712,10 +742,11 @@ class StimulusDecider():
                 
                 # Accepted event
                 self.accepted_pupil_event()
-                
+                idx_to_return = self._idx_event
                 # Reset search window 
                 self.reset_search_window()
                 self._idx_event = 0
+                return idx_to_return
             
             # If IEI is not exceeded 
             elif pupil_phase_IEI_timer.getTime() < self._IEI_duration_sec:
@@ -739,12 +770,21 @@ class StimulusDecider():
         return 0
     
     def demean_search_window(search_window: np.array) -> np.ndarray:
-        """Calculate the mean of the pupil_sample and subtract from all data samples."""
+        """Calculate the mean of the pupil_sample and subtract from all data samples.
+        
+        Returns 
+        ----------
+        list 
+            demeaned window. Array will have mean of 0. 
+
+        """
 
         return list(search_window - np.mean(search_window))
 
     def build_search_window(self) -> float:
-        """Add the pupil sample to search window"""
+        """Add the pupil sample to baseline and search window. 
+        
+        """
         
         el_tracker = pylink.getEYELINK()
 
@@ -805,3 +845,15 @@ class StimulusDecider():
 def get_pupil_sample_duration_time(self):
     """Used to log pupil sample duration array."""
     return self._pupil_sample_duration_time
+
+def get_search_window(self): 
+    return self._search_window
+
+def get_search_window_times(self):
+    return self._search_window_sample_times
+
+def get_baseline_window(self):
+    return self._baseline_window
+
+def get_search_window_fit_vals(self): 
+    return self._search_window_model_fits
