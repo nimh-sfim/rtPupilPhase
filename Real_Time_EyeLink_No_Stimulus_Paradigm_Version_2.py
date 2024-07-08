@@ -37,7 +37,7 @@ from StimulusDecider import StimulusDecider
 # *** MAIN FUNCTION ***
 # *********************
 
-def main(task_name, behavioral_folder, eyelink_folder, block_length, baseline_duration_ms,
+def main(task_name, behavioral_folder, eyelink_folder, block_length, max_num_blocks, baseline_duration_ms,
          max_search_window_duration_ms, num_random_events, IEI_duration_sec, ms_per_sample, 
          pupil_sample_duration_ms, peak_pupil_quantile, trough_pupil_quantile, 
          dilation_quantile, constriction_quantile, peak_threshold, trough_threshold,
@@ -86,21 +86,21 @@ def main(task_name, behavioral_folder, eyelink_folder, block_length, baseline_du
     behavioral_folder = 'Behavioral_Data'
 
     # Eyelink data file
-    results_folder = 'EyeLink_Data'
+    eyelink_folder = 'EyeLink_Data'
 
     # Define task name
     task_name = 'Fixation Task'
 
     # Define EyeLink folder - directory of task + folder name
-    eyelinkFolder = (results_folder + os.path.sep)
+    eyelinkFolder = (eyelink_folder + os.path.sep)
 
     # Check for the behavioral data directory, otherwise make it
     if not os.path.isdir(behavioral_folder):
             os.makedirs(behavioral_folder)  # If this fails (e.g. permissions) we will get error
 
     # Check for the EyeLink data directory, otherwise make it
-    if not os.path.isdir(results_folder):
-            os.makedirs(results_folder) # If this fails (e.g. permissions) we will get error
+    if not os.path.isdir(eyelink_folder):
+            os.makedirs(eyelink_folder) # If this fails (e.g. permissions) we will get error
 
     # Show only critical log messages in the PsychoPy console
     logFile = logging.LogFile(behavioral_folder + os.path.sep + filename + '_Session_'+str(info['Session #'])+'_Real_Time_Pupillometry_Fixation_'+info['date']+'_'+task_version+'.log', level=logging.EXP)
@@ -147,14 +147,6 @@ def main(task_name, behavioral_folder, eyelink_folder, block_length, baseline_du
 
     # Create text screens to display later:
     instructions = visual.TextStim(win, text='', color='white', pos=[0, 2])  #This is an empty instructions screen to be filled with text below
-
-    # ***********************
-    # *** TASK PARAMETERS ***
-    # ***********************
-
-    # Maximum number of blocks (before quitting task)
-    max_num_blocks = 10 
-    block_duration_sec = 600
 
     # *******************
     # *** TASK TIMERS ***
@@ -467,10 +459,10 @@ def main(task_name, behavioral_folder, eyelink_folder, block_length, baseline_du
         block_timer.reset()
 
         # Wait block duration
-        while block_timer.getTime() < block_duration_sec:
+        while block_timer.getTime() < block_length:
             
             # Display a halfway completion screen
-            if halfway_screen == False and block_timer.getTime() > block_duration_sec/2:
+            if halfway_screen == False and block_timer.getTime() > block_length/2:
 
                 # Reset
                 halfway_screen = True
@@ -555,108 +547,46 @@ if __name__ == "__main__":
     parser.add_argument("behavioral_folder",help="Directory where behavioral data should be stored")
     parser.add_argument("eyelink_folder", help="Directory where EyeLink data should be stored")
     parser.add_argument("task_name", help="Name of task")
-    parser.add_argument("block_length", help="Duration of a single block, in seconds", 
-                        type=int)
-    parser.add_argument("baseline_duration_ms", help="Duration of baseline window in milliseconds", 
-                        type=int)
-    parser.add_argument("max_search_window_duration_ms", help="Maximum duration of search window before resetting, in milliseconds",
-                         type=int)
-    parser.add_argument("num_random_events", help="Number of random events per block", type=int)
-    parser.add_argument("IEI_duration_sec", help="Inter-event interval - how long to wait between valid events", 
-                        type=int)
-    parser.add_argument("ms_per_sample", help="Length of a single real-time pupil sample in milliseconds", 
-                        type=int)
-    parser.add_argument("pupil_sample_duration_ms", help="How long we should consider a pupil sample in milliseconds", 
-                        type=int)
-    parser.add_argument("peak_pupil_quantile", help="Quantile value a peak must be bigger than to accept",
-                        type=float)
-    parser.add_argument("trough_pupil_quantile", help="Quantile value a trough must be smaller than to accept",
-                        type=float)
-    parser.add_argument("dilation_quantile", help="Quantile value a dilation must be bigger than to accept",
-                        type=float)
-    parser.add_argument("constriction_quantile", help="Quantile value a constriction must be smaller than to accept",
-                        type=float)
-    parser.add_argument("peak_threshold_var", help="Initial threshold value that a pupil sample must be greater than to accept a peak",
-                    type=float)
-    parser.add_argument("trough_threshold_var", help="Initial threshold value that a pupil sample must be smaller than to accept a trough",
-                    type=float)
-    parser.add_argument("dilation_threshold", help="Initial threshold value that the change between pupil samples must be greater than to accept a dilation",
-                    type=float)
-    parser.add_argument("constriction_threshold", help="Initial threshold value that the change between pupil samples must be smaller than to accept a constriction",
-                    type=float)
+    parser.add_argument("--max_num_blocks", help="Number of task blocks. Default: 10 blocks", 
+                        type=int, default=10)
+    parser.add_argument("--block_length", help="Duration of a single block, in seconds. Default: 600s", 
+                        type=int, default=600)
+    parser.add_argument("--baseline_duration_ms", help="Duration of baseline window in milliseconds. Default: 5000ms", 
+                        type=int, default=5000)
+    parser.add_argument("--max_search_window_duration_ms", help="Maximum duration of search window before resetting, in milliseconds. Default: 5000ms",
+                         type=int, default=5000)
+    parser.add_argument("--num_random_events", help="Number of random events per block. Default: 20 events", 
+                        type=int, default=20)
+    parser.add_argument("--IEI_duration_sec", help="Inter-event interval - how long to wait between valid events in seconds. Default: 3s", 
+                        type=int, default=3)
+    parser.add_argument("--ms_per_sample", help="Length of a single real-time pupil sample in milliseconds. Default: 17ms", 
+                        type=int, default=17)
+    parser.add_argument("--pupil_sample_duration_ms", help="How long we should consider a pupil sample in milliseconds. Default: 100ms", 
+                        type=int, default=100)
+    parser.add_argument("--peak_pupil_quantile", help="Quantile value a peak must be bigger than to accept. Default: 0.75",
+                        type=float, default=0.75)
+    parser.add_argument("--trough_pupil_quantile", help="Quantile value a trough must be smaller than to accept. Default: 0.25",
+                        type=float, default=0.25)
+    parser.add_argument("--dilation_quantile", help="Quantile value a dilation must be bigger than to accept. Default: 0.99",
+                        type=float, default=0.99)
+    parser.add_argument("--constriction_quantile", help="Quantile value a constriction must be smaller than to accept. Default: 0.01",
+                        type=float, default=0.01)
+    parser.add_argument("--peak_threshold", help="Initial threshold value that a pupil sample must be greater than to accept a peak. Default: 0.",
+                    type=float, default=0.)
+    parser.add_argument("--trough_threshold", help="Initial threshold value that a pupil sample must be smaller than to accept a trough. Default: 0.",
+                    type=float, default=0.)
+    parser.add_argument("--dilation_threshold", help="Initial threshold value that the change between pupil samples must be greater than to accept a dilation. Default: 50.",
+                    type=float, default=50.)
+    parser.add_argument("--constriction_threshold", help="Initial threshold value that the change between pupil samples must be smaller than to accept a constriction. Default: -50.",
+                    type=float, default=-50.)
     
     args = parser.parse_args()
 
-    if not args.ms_per_sample:
-        ms_per_sample = 17
-    else:
-        ms_per_sample = args.ms_per_sample
-    if not args.pupil_sample_duration_ms:
-        pupil_sample_duration_ms = 100
-    else: 
-        pupil_sample_duration_ms = args.pupil_sample_duration_ms
-    if not args.block_length: 
-        block_length = 600
-    else: 
-        block_length = args.block_length
-    if not args.num_random_events:
-        num_random_events = 20
-    else: 
-        num_random_events = args.num_random_events
-    if not args.max_search_window_duration_ms: 
-        max_search_window_duration_ms = 5000
-    else: 
-        max_search_window_duration_ms = args.max_search_window_duration_ms
-    if not args.baseline_duration_ms: 
-        baseline_duration_ms = 5000
-    else: 
-        baseline_duration_ms = args.baseline_duration_ms
-    if not args.IEI_duration_sec: 
-        IEI_duration_sec = 3
-    else: 
-        IEI_duration_sec = args.IEI_duration_sec
-    if not args.ms_per_sample: 
-        ms_per_sample = 17
-    else: 
-        ms_per_sample = args.ms_per_sample
 
-    if not args.peak_pupil_quantile:
-        peak_pupil_quantile = 0.75
-    else: 
-        peak_pupil_quantile = args.peak_pupil_quantile
-    if not args.trough_pupil_quantile:
-        trough_pupil_quantile = 0.25
-    else:
-        trough_pupil_quantile = args.trough_pupil_quantile 
-    
-    if not args.dilation_quantile:
-        dilation_quantile = 0.99 
-    else: 
-        dilation_quantile = args.dilation_quantile 
-    if not args.constriction_quantile:
-        constriction_quantile = 0.01
-    else: 
-        constriction_quantile = args.constriction_quantile 
-    if not args.peak_threshold_var:
-        peak_threshold_var = 0.
-    else: 
-        peak_threshold_var = args.peak_threshold_var 
-    if not args.trough_threshold_var:
-        trough_threshold_var = 0.
-    else: 
-        trough_threshold_var = args.trough_threshold_var
-    if not args.dilation_threshold_var:
-        dilation_threshold_var = 50.
-    else:
-        dilation_threshold_var = args.dilation_threshold_var
-    if not args.constriction_threshold_var:
-        constriction_threshold_var = -50.
-    else:
-        constriction_threshold_var = args.constriction_threshold_var
-    
-
-    main(args.task_name, args.behavioral_folder, args.eyelink_folder, block_length, 
-         baseline_duration_ms, max_search_window_duration_ms, num_random_events, IEI_duration_sec,
-         ms_per_sample, pupil_sample_duration_ms, peak_pupil_quantile, trough_pupil_quantile, 
-         dilation_quantile, constriction_quantile, peak_threshold_var, trough_threshold_var, 
-         constriction_threshold_var, dilation_threshold_var)
+    main(args.task_name, args.behavioral_folder, args.eyelink_folder, args.block_length, 
+        args.max_num_blocks,
+        args.baseline_duration_ms, args.max_search_window_duration_ms, args.num_random_events, 
+        args.IEI_duration_sec, args.ms_per_sample, args.pupil_sample_duration_ms, 
+        args.peak_pupil_quantile, args.trough_pupil_quantile, args.dilation_quantile, 
+        args.constriction_quantile, args.peak_threshold, args.trough_threshold, 
+        args.constriction_threshold, args.dilation_threshold)
