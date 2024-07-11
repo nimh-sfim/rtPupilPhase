@@ -19,20 +19,6 @@ def set_up_directories( behavioral_folder, eyelink_folder):
     _thisDir = os.path.dirname(os.path.abspath(__file__))
     os.chdir(_thisDir)
 
-def set_up_basics(resolution): 
-       # parameters - resolution in pixels  
-       # basic window 
-       win = visual.Window(size = resolution, color = [0,0,0], monitor = 'testMonitor', fullscr = True, units ='cm')
-
-       # fixation screen
-       fixation = visual.TextStim(win, text="+", color = 'black', pos = [0, 0], autoLog = False)
-
-       #This is an empty instructions screen to be filled with text below
-       instructions = visual.TextStim(win, text='', color='white', pos=[0, 2])  
-
-       return win, fixation, instructions
-
-
 def clear_screen():
     """ Clear window """ 
     
