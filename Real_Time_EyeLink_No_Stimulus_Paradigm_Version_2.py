@@ -31,20 +31,6 @@ from PsychoPy_funcs import set_up_directories, instructions_screens, general_ins
 from StimulusDecider import StimulusDecider
 from EyeLinkFunctions import validate_edf_fname, setup_eyelink, calibrate_eyelink
 
-# ***************************
-# ******* USER INPUTS *******
-# ***************************
-
-# Setup the subject info screen
-info = {'Session #': 1, 'Subject ID': 'Test', 'EyeLink': ['y','n'], 'EyeLink EDF': 'test.edf', '(1) Skip task instructions':['n', 'y']}
-dlg = gui.DlgFromDict(info, title = 'Real Time Pupillometry Fixation Experiment')
-# Find experiment date
-info['date'] = data.getDateStr()
-# Filename = Subject ID entered above
-sub_id = info['Subject ID']
-# EyeLink EDF filename
-tmp_str = info['EyeLink EDF']
-
 # *********************
 # *** MAIN FUNCTION ***
 # *********************
@@ -52,9 +38,21 @@ tmp_str = info['EyeLink EDF']
 def main(task_name, behavioral_folder, eyelink_folder, block_length, max_num_blocks, baseline_duration_ms,
          max_search_window_duration_ms, num_random_events, IEI_duration_sec, 
          pupil_sample_duration_ms, peak_pupil_quantile, trough_pupil_quantile, 
-         dilation_quantile, constriction_quantile, peak_threshold, trough_threshold,
-         constriction_threshold, dilation_threshold):
+         dilation_quantile, constriction_quantile):
 
+    # ***************************
+    # ******* USER INPUTS *******
+    # ***************************
+
+    # Setup the subject info screen
+    info = {'Session #': 1, 'Subject ID': 'Test', 'EyeLink': ['y','n'], 'EyeLink EDF': 'test.edf', '(1) Skip task instructions':['n', 'y']}
+    dlg = gui.DlgFromDict(info, title = 'Real Time Pupillometry Fixation Experiment')
+    # Find experiment date
+    info['date'] = data.getDateStr()
+    # Filename = Subject ID entered above
+    sub_id = info['Subject ID']
+    # EyeLink EDF filename
+    tmp_str = info['EyeLink EDF']
 
     # *****************************************
     # *** MANAGE DATA FOLDERS AND FILENAMES ***
@@ -68,9 +66,15 @@ def main(task_name, behavioral_folder, eyelink_folder, block_length, max_num_blo
 
     # Show only critical log messages in the PsychoPy console
     logFile = logging.LogFile(behavioral_folder + os.path.sep + sub_id + '_Session_'+str(info['Session #'])+'_'+task_name+'_'+info['date']+'.log', level=logging.EXP)
-    param_log_message = "Task Name: "+task_name+", block length: "+block_length+", max_num_blocks: "+max_num_blocks+", baseline_duration_ms: "+\
-    baseline_duration_ms+", max_search_window_duration_ms: "+max_search_window_duration_ms+", num_random_events: "+num_random_events+\
-    ", IEI_duration_sec: "+IEI_duration_sec+", "
+
+    # log input parameters
+    param_log_message = "Input Parameters: Task Name: "+task_name+", block length: "+str(block_length)+", max_num_blocks: "+str(max_num_blocks)+\
+    ", baseline_duration_ms: "+str(baseline_duration_ms)+", max_search_window_duration_ms: "+str(max_search_window_duration_ms)+\
+    ", num_random_events: "+str(num_random_events)+", IEI_duration_sec: "+str(IEI_duration_sec)+", pupil_sample_duration_ms: "+\
+    str(pupil_sample_duration_ms)+", peak_pupil_quantile: "+str(peak_pupil_quantile)+", trough_pupil_quantile: "+str(trough_pupil_quantile)+\
+    ", dilation_quantile: "+str(dilation_quantile)+", constriction_quantile: "+str(constriction_quantile)
+
+    logging.log(level=logging.EXP,msg=param_log_message)
 
     # validate edf file name (length <= 8 & no special char)
     edf_fname, edf_state, edf_message = validate_edf_fname(tmp_str)
@@ -106,8 +110,6 @@ def main(task_name, behavioral_folder, eyelink_folder, block_length, max_num_blo
     # *** INITIATE EYELINK ***
     # ************************
 
-    # Note: The script below is provided by SR Research, Inc.
-
     # EyeLink Dummy mode? - Set to False if testing with actual system
     if info['EyeLink'] == 'y':
         dummy_mode = False
@@ -116,7 +118,7 @@ def main(task_name, behavioral_folder, eyelink_folder, block_length, max_num_blo
         dummy_mode = True
         logging.log(level=logging.EXP,msg='Experiment run in dummy mode - no EyeLink')
 
-    setup_eyelink(win, dummy_mode, edf_fname, config.use_retina)
+    setup_eyelink(win, dummy_mode, edf_fname)
     calibrate_eyelink(dummy_mode)
     el_tracker = pylink.getEYELINK()
 
@@ -129,7 +131,6 @@ def main(task_name, behavioral_folder, eyelink_folder, block_length, max_num_blo
                         max_search_window_duration_ms, pupil_sample_duration_ms, 
                         num_random_events, IEI_duration_sec, peak_pupil_quantile,
                         trough_pupil_quantile, dilation_quantile, constriction_quantile,
-                        peak_threshold, trough_threshold, dilation_threshold, constriction_threshold,
                         online=True, win=win) # sets up stimulus decider object
     
     # *******************************
@@ -291,14 +292,6 @@ if __name__ == "__main__":
                         type=float, default=0.99)
     parser.add_argument("--constriction_quantile", help="Quantile value a constriction must be smaller than to accept. Default: 0.01",
                         type=float, default=0.01)
-    parser.add_argument("--peak_threshold", help="Initial threshold value that a pupil sample must be greater than to accept a peak. Default: 0.",
-                    type=float, default=0.)
-    parser.add_argument("--trough_threshold", help="Initial threshold value that a pupil sample must be smaller than to accept a trough. Default: 0.",
-                    type=float, default=0.)
-    parser.add_argument("--dilation_threshold", help="Initial threshold value that the change between pupil samples must be greater than to accept a dilation. Default: 50.",
-                    type=float, default=50.)
-    parser.add_argument("--constriction_threshold", help="Initial threshold value that the change between pupil samples must be smaller than to accept a constriction. Default: -50.",
-                    type=float, default=-50.)
     
     args = parser.parse_args()
 
@@ -307,5 +300,4 @@ if __name__ == "__main__":
         args.max_num_blocks, args.baseline_duration_ms, args.max_search_window_duration_ms,
         args.num_random_events, args.IEI_duration_sec, args.pupil_sample_duration_ms, 
         args.peak_pupil_quantile, args.trough_pupil_quantile, args.dilation_quantile, 
-        args.constriction_quantile, args.peak_threshold, 
-        args.trough_threshold, args.constriction_threshold, args.dilation_threshold)
+        args.constriction_quantile)

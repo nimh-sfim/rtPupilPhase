@@ -39,16 +39,16 @@ class StimulusDecider():
         final values from model fit on pupil samples 
     peak_threshold_var : float
         absolute threshold for identifying a peak event - event must be larger than this value 
-        to be identified as a peak 
+        to be identified as a peak. Taken from config.py file. 
     trough_threshold_var : float
         absolute threshold for identifying a trough event - event must be smaller than this value
-        to be identified as a trough
+        to be identified as a trough. Taken from config.py file. 
     dilation_threshold : float
         absolute threshold for identifying a dilation event - first derivative of search window 
-        must be larger than this value to be identified as a dilation 
+        must be larger than this value to be identified as a dilation. Taken from config.py file.  
     constriction_threshold : float
         absolute threshold for identifying a constriction event - first derivative of search window
-        must be smaller than this value to be identified as a constriction 
+        must be smaller than this value to be identified as a constriction. Taken from config.py file. 
     peak_pupil_quantile : float
         quantile threshold for identifying peak values - pupil size must be above this quantile 
         of values in baseline window to be accepted as a peak 
@@ -136,11 +136,8 @@ class StimulusDecider():
         self,task_name, block_duration_sec=600, 
         baseline_duration_ms=5000, max_search_window_duration_ms=5000,
         pupil_sample_duration_ms=100, num_random_event=20,
-        IEI_duration_sec=3,
-        peak_pupil_quantile=0.75, trough_pupil_quantile=0.25, 
-        dilation_quantile=0.99, constriction_quantile=0.01, 
-        peak_threshold_var = 0., trough_threshold_var = 0., dilation_threshold=50., 
-        constriction_threshold=-50., online=False, win=None
+        IEI_duration_sec=3, peak_pupil_quantile=0.75, trough_pupil_quantile=0.25, 
+        dilation_quantile=0.99, constriction_quantile=0.01, online=False, win=None
     ):
         """
         Sets up a StimulusDecider object with defaults that reflect options from Kronemer et al., 2024. 
@@ -171,18 +168,6 @@ class StimulusDecider():
             quantile threshold for identifying dilations - used to define absolute value threshold
         constriction_quantile : float
             quantile threshold for identifying constrictions - used to define absoulte value threhold
-        peak_threshold_var : float
-            absolute threshold for identifying a peak event - event must be larger than this value 
-            to be identified as a peak 
-        trough_threshold_var : float
-            absolute threshold for identifying a trough event - event must be smaller than this value
-            to be identified as a trough
-        dilation_threshold : float
-            absolute threshold for identifying a dilation event - first derivative of search window 
-            must be larger than this value to be identified as a dilation 
-        constriction_threshold : float
-            absolute threshold for identifying a constriction event - first derivative of search window
-            must be smaller than this value to be identified as a constriction 
         online : boolean 
             whether object is used in real time data collection or in simulations    
         win : PsychoPy Window
@@ -209,10 +194,10 @@ class StimulusDecider():
         self._dilation_count = 0
         self._constriction_count = 0
         self._accepted_pupil_event_bool = False
-        self._peak_threshold_var = peak_threshold_var
-        self._trough_threshold_var = trough_threshold_var
-        self._dilation_threshold = dilation_threshold
-        self._constriction_threshold = constriction_threshold
+        self._peak_threshold_var = config.peak_threshold
+        self._trough_threshold_var = config.trough_threshold
+        self._dilation_threshold = config.dilation_threshold
+        self._constriction_threshold = config.constriction_threshold
         self._peak_pupil_quantile = peak_pupil_quantile
         self._trough_pupil_quantile = trough_pupil_quantile 
         self._dilation_quantile = dilation_quantile

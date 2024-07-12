@@ -7,7 +7,9 @@ import sys
 import platform
 import numpy as np
 import time
+
 from PsychoPy_funcs import instructions_screens, terminate_task
+from config import use_retina
 
 def validate_edf_fname(edf_fname):
     # Note: The script below is provided by SR Research, Inc.
@@ -27,7 +29,7 @@ def validate_edf_fname(edf_fname):
 
     return edf_fname, state, message
 
-def setup_eyelink(win, dummy_mode, edf_fname, use_retina=True): 
+def setup_eyelink(win, dummy_mode, edf_fname): 
 
     # Note: The script below is provided by SR Research, Inc.
      # Step 1: Connect to the EyeLink Host PC
@@ -101,38 +103,33 @@ def setup_eyelink(win, dummy_mode, edf_fname, use_retina=True):
     else:
         file_sample_flags = 'LEFT,RIGHT,GAZE,HREF,RAW,AREA,GAZERES,BUTTON,STATUS,INPUT'
         link_sample_flags = 'LEFT,RIGHT,GAZE,GAZERES,AREA,STATUS,INPUT'
+
+    if not dummy_mode:
         
-    el_tracker.sendCommand("file_event_filter = %s" % file_event_flags)
-    el_tracker.sendCommand("file_sample_data = %s" % file_sample_flags)
-    el_tracker.sendCommand("link_event_filter = %s" % link_event_flags)
-    el_tracker.sendCommand("link_sample_data = %s" % link_sample_flags)
-
-    # Set EyeLink sample rate
-    if eyelink_ver > 2 and not dummy_mode:
-        el_tracker.sendCommand("sample_rate 1000")
+        el_tracker.sendCommand("file_event_filter = %s" % file_event_flags)
+        el_tracker.sendCommand("file_sample_data = %s" % file_sample_flags)
+        el_tracker.sendCommand("link_event_filter = %s" % link_event_flags)
+        el_tracker.sendCommand("link_sample_data = %s" % link_sample_flags)
+        # Set EyeLink sample rate
+        if eyelink_ver > 2 :
+            el_tracker.sendCommand("sample_rate 1000")
         
-    # Choose a calibration type, H3, HV3, HV5, HV13 (HV = horizontal/vertical),
-    el_tracker.sendCommand("calibration_type = HV9")
+        # Choose a calibration type, H3, HV3, HV5, HV13 (HV = horizontal/vertical),
+        el_tracker.sendCommand("calibration_type = HV9")
 
-    # Set a gamepad button to accept calibration/drift check target
-    # You need a supported gamepad/button box that is connected to the Host PC
-    el_tracker.sendCommand("button_function 5 'accept_target_fixation'")
+        # Set a gamepad button to accept calibration/drift check target
+        # You need a supported gamepad/button box that is connected to the Host PC
+        el_tracker.sendCommand("button_function 5 'accept_target_fixation'")
 
-    # Shrink the spread of the calibration/validation targets
-    # if the default outermost targets are not all visible in the bore.
-    # The default <x, y display proportion> is 0.88, 0.83 (88% of the display
-    # horizontally and 83% vertically)
-    el_tracker.sendCommand('calibration_area_proportion 0.88 0.83')
-    el_tracker.sendCommand('validation_area_proportion 0.88 0.83')
+        # Shrink the spread of the calibration/validation targets
+        # if the default outermost targets are not all visible in the bore.
+        # The default <x, y display proportion> is 0.88, 0.83 (88% of the display
+        # horizontally and 83% vertically)
+        el_tracker.sendCommand('calibration_area_proportion 0.88 0.83')
+        el_tracker.sendCommand('validation_area_proportion 0.88 0.83')
 
     # Get the native screen resolution used by PsychoPy
     scn_width, scn_height = win.size
-
-    # Set this variable to True if you use the built-in retina screen as your 
-    # primary display device on macOS. If have an external monitor, set this 
-    # variable True if you choose to "Optimize for Built-in Retina Display" 
-    # in the Displays preference settings.
-    use_retina = True
 
     # Resolution fix for Mac retina displays
     if 'Darwin' in platform.system():
@@ -147,23 +144,25 @@ def setup_eyelink(win, dummy_mode, edf_fname, use_retina=True):
     # el_tracker.sendCommand('driftcorrect_cr_disable = OFF')
     # el_tracker.sendCommand('normal_click_dcorr = ON')
 
-    # Online drift correction to a fixed location, e.g., screen center
-    el_tracker.sendCommand('driftcorrect_cr_disable = OFF')
-    el_tracker.sendCommand('online_dcorr_refposn %d,%d' % (int(scn_width/2.0),
-                                                            int(scn_height/2.0)))
-    el_tracker.sendCommand('online_dcorr_button = ON')
-    el_tracker.sendCommand('normal_click_dcorr = OFF')
+    if not dummy_mode:
+        
+        # Online drift correction to a fixed location, e.g., screen center
+        el_tracker.sendCommand('driftcorrect_cr_disable = OFF')
+        el_tracker.sendCommand('online_dcorr_refposn %d,%d' % (int(scn_width/2.0),
+                                                                int(scn_height/2.0)))
+        el_tracker.sendCommand('online_dcorr_button = ON')
+        el_tracker.sendCommand('normal_click_dcorr = OFF')
 
-    # Pass the display pixel coordinates (left, top, right, bottom) to the tracker
-    # see the EyeLink Installation Guide, "Customizing Screen Settings"
-    el_coords = "screen_pixel_coords = 0 0 %d %d" % (scn_width - 1, scn_height - 1)
-    el_tracker.sendCommand(el_coords)
+        # Pass the display pixel coordinates (left, top, right, bottom) to the tracker
+        # see the EyeLink Installation Guide, "Customizing Screen Settings"
+        el_coords = "screen_pixel_coords = 0 0 %d %d" % (scn_width - 1, scn_height - 1)
+        el_tracker.sendCommand(el_coords)
 
-    # Write a DISPLAY_COORDS message to the EDF file
-    # Data Viewer needs this piece of info for proper visualization, see Data
-    # Viewer User Manual, "Protocol for EyeLink Data to Viewer Integration"
-    dv_coords = "DISPLAY_COORDS  0 0 %d %d" % (scn_width - 1, scn_height - 1)
-    el_tracker.sendMessage(dv_coords)
+        # Write a DISPLAY_COORDS message to the EDF file
+        # Data Viewer needs this piece of info for proper visualization, see Data
+        # Viewer User Manual, "Protocol for EyeLink Data to Viewer Integration"
+        dv_coords = "DISPLAY_COORDS  0 0 %d %d" % (scn_width - 1, scn_height - 1)
+        el_tracker.sendMessage(dv_coords)
 
     # Configure a graphics environment (genv) for tracker calibration
     genv = EyeLinkCoreGraphicsPsychoPy(el_tracker, win)
@@ -198,44 +197,41 @@ def setup_eyelink(win, dummy_mode, edf_fname, use_retina=True):
     if use_retina:
         genv.fixMacRetinaDisplay()
 
+    #if not dummy_mode:
     # Request Pylink to use the PsychoPy window we opened above for calibration
     pylink.openGraphicsEx(genv)
 
 def calibrate_eyelink(dummy_mode): 
     # Note: The script below is provided by SR Research, Inc.
     el_tracker = pylink.getEYELINK()
-
     if not dummy_mode: 
          # Gaze calibration
         task_msg = 'Press O to calibrate tracker'
         instructions_screens(task_msg)
-    try:
-        el_tracker.doTrackerSetup()
+        try:
+            el_tracker.doTrackerSetup()
+            
+        # Error
+        except RuntimeError as err:
+            print('ERROR:', err)
+            el_tracker.exitCalibration()
         
-    # Error
-    except RuntimeError as err:
-        print('ERROR:', err)
-        el_tracker.exitCalibration()
+        el_tracker.setOfflineMode()  
+        # Try start recording
+        try:
+            el_tracker.startRecording(1, 1, 1, 1)
         
-    el_tracker.setOfflineMode()  
-    # Try start recording
-    try:
-        el_tracker.startRecording(1, 1, 1, 1)
-    
-    # Error
-    except RuntimeError as error:
-        print("ERROR:", error)
-        terminate_task()
-    eye_used = el_tracker.eyeAvailable()
-    
-    if eye_used == 1:
-        el_tracker.sendMessage("EYE_USED 1 RIGHT")
-    elif eye_used == 0 or eye_used == 2:
-        el_tracker.sendMessage("EYE_USED 0 LEFT")
-        eye_used = 0
-    else:
-        print("Error in getting the eye information!")
-    
+        # Error
+        except RuntimeError as error:
+            print("ERROR:", error)
+            terminate_task()
+        eye_used = el_tracker.eyeAvailable()
+        
+        if eye_used == 1:
+            el_tracker.sendMessage("EYE_USED 1 RIGHT")
+        elif eye_used == 0 or eye_used == 2:
+            el_tracker.sendMessage("EYE_USED 0 LEFT")
+            eye_used = 0
+        else:
+            print("Error in getting the eye information!")
     pylink.pumpDelay(100)
-
-
