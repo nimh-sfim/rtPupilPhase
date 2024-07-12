@@ -50,7 +50,7 @@ tmp_str = info['EyeLink EDF']
 # *********************
 
 def main(task_name, behavioral_folder, eyelink_folder, block_length, max_num_blocks, baseline_duration_ms,
-         max_search_window_duration_ms, num_random_events, IEI_duration_sec, ms_per_sample, 
+         max_search_window_duration_ms, num_random_events, IEI_duration_sec, 
          pupil_sample_duration_ms, peak_pupil_quantile, trough_pupil_quantile, 
          dilation_quantile, constriction_quantile, peak_threshold, trough_threshold,
          constriction_threshold, dilation_threshold):
@@ -68,6 +68,9 @@ def main(task_name, behavioral_folder, eyelink_folder, block_length, max_num_blo
 
     # Show only critical log messages in the PsychoPy console
     logFile = logging.LogFile(behavioral_folder + os.path.sep + sub_id + '_Session_'+str(info['Session #'])+'_'+task_name+'_'+info['date']+'.log', level=logging.EXP)
+    param_log_message = "Task Name: "+task_name+", block length: "+block_length+", max_num_blocks: "+max_num_blocks+", baseline_duration_ms: "+\
+    baseline_duration_ms+", max_search_window_duration_ms: "+max_search_window_duration_ms+", num_random_events: "+num_random_events+\
+    ", IEI_duration_sec: "+IEI_duration_sec+", "
 
     # validate edf file name (length <= 8 & no special char)
     edf_fname, edf_state, edf_message = validate_edf_fname(tmp_str)
@@ -122,7 +125,7 @@ def main(task_name, behavioral_folder, eyelink_folder, block_length, max_num_blo
     rng = np.random.default_rng()
     
     # Setup classes
-    sd = StimulusDecider(task_name, ms_per_sample, block_length, baseline_duration_ms, 
+    sd = StimulusDecider(task_name, block_length, baseline_duration_ms, 
                         max_search_window_duration_ms, pupil_sample_duration_ms, 
                         num_random_events, IEI_duration_sec, peak_pupil_quantile,
                         trough_pupil_quantile, dilation_quantile, constriction_quantile,
@@ -278,8 +281,6 @@ if __name__ == "__main__":
                         type=int, default=20)
     parser.add_argument("--IEI_duration_sec", help="Inter-event interval - how long to wait between valid events in seconds. Default: 3s", 
                         type=int, default=3)
-    parser.add_argument("--ms_per_sample", help="Length of a single real-time pupil sample in milliseconds. Default: 17ms", 
-                        type=int, default=17)
     parser.add_argument("--pupil_sample_duration_ms", help="How long we should consider a pupil sample in milliseconds. Default: 100ms", 
                         type=int, default=100)
     parser.add_argument("--peak_pupil_quantile", help="Quantile value a peak must be bigger than to accept. Default: 0.75",
@@ -304,7 +305,7 @@ if __name__ == "__main__":
 
     main(args.task_name, args.behavioral_folder, args.eyelink_folder, args.block_length, 
         args.max_num_blocks, args.baseline_duration_ms, args.max_search_window_duration_ms,
-        args.num_random_events, args.IEI_duration_sec, args.ms_per_sample, 
-        args.pupil_sample_duration_ms, args.peak_pupil_quantile, args.trough_pupil_quantile, 
-        args.dilation_quantile, args.constriction_quantile, args.peak_threshold, 
+        args.num_random_events, args.IEI_duration_sec, args.pupil_sample_duration_ms, 
+        args.peak_pupil_quantile, args.trough_pupil_quantile, args.dilation_quantile, 
+        args.constriction_quantile, args.peak_threshold, 
         args.trough_threshold, args.constriction_threshold, args.dilation_threshold)

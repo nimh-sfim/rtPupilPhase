@@ -2,7 +2,7 @@ import numpy as np
 from scipy.signal import find_peaks
 from psychopy import logging, core
 import pylink
-
+import config
 from PsychoPy_funcs import quit_task
 
 class StimulusDecider():
@@ -14,8 +14,6 @@ class StimulusDecider():
         name of task to be used with decider 
     online : boolean 
         whether object is used in real time data collection or in simulations
-    ms_per_sample : int 
-        length of a single real-time pupil sample in milliseconds 
     baseline_duration_ms : int 
         duration of baseline window in milliseconds 
     max_search_window_duration_ms : int
@@ -135,7 +133,7 @@ class StimulusDecider():
     """
     
     def __init__(
-        self,task_name, ms_per_sample=17, block_duration_sec=600, 
+        self,task_name, block_duration_sec=600, 
         baseline_duration_ms=5000, max_search_window_duration_ms=5000,
         pupil_sample_duration_ms=100, num_random_event=20,
         IEI_duration_sec=3,
@@ -151,8 +149,6 @@ class StimulusDecider():
         ----------
         task_name: str
             name of task to be used with decider 
-        ms_per_sample : int
-            duration of a given pupil sample in real-time in milliseconds 
         block_duration_sec : int 
             number of seconds in a block 
         baseline_duration_ms : int
@@ -193,7 +189,6 @@ class StimulusDecider():
             screen to be updated in real-time 
         """
     
-        self._ms_per_sample = ms_per_sample
         self._baseline_duration_ms = baseline_duration_ms
         self._max_search_window_duration_ms = max_search_window_duration_ms
         self._pupil_sample_duration_ms = pupil_sample_duration_ms
@@ -703,14 +698,14 @@ class StimulusDecider():
         """
         el_tracker = pylink.getEYELINK()
 
-        valid_window = self.validate_search_window(self._max_search_window_duration_ms//self._ms_per_sample)
+        valid_window = self.validate_search_window(self._max_search_window_duration_ms//config.ms_per_sample)
         if not valid_window:
             return 0
         
         demeaned_search_window = self.demean_search_window(self._search_window)
 
         # Reset pupil phase pupil size and pupil size derivative thresholds - once the minimum baseline duration has been acquired
-        if len(self._baseline_window) > round(self._baseline_duration_ms//self._ms_per_sample):
+        if len(self._baseline_window) > round(self._baseline_duration_ms//config.ms_per_sample):
             self.set_pupil_phase_thresholds(self._baseline_window)
         
         # Log random event if the minimum random IEI is exceed      
@@ -808,7 +803,7 @@ class StimulusDecider():
         self._pupil_sample_timer.reset()
         
         # Keep adding pupil values until pupil_sample is long enough      
-        while len(pupil_sample) < self._pupil_sample_duration_ms//self._ms_per_sample:
+        while len(pupil_sample) < self._pupil_sample_duration_ms//config.ms_per_sample:
         
             # Update window
             if self._win is not None:
