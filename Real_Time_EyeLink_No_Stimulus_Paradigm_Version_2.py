@@ -21,18 +21,31 @@ import numpy as np
 import time
 import pylink
 import os
-import platform
-import sys
-from scipy.signal import find_peaks
 import argparse
 
 # EyeLink Functions
-#from EyeLinkCoreGraphicsPsychoPy import EyeLinkCoreGraphicsPsychoPy
-from string import ascii_letters, digits
+from EyeLinkCoreGraphicsPsychoPy import EyeLinkCoreGraphicsPsychoPy
 
 from PsychoPy_funcs import set_up_directories, instructions_screens, general_instruction_screens, block_trigger, end_experiment
 from StimulusDecider import StimulusDecider
 from EyeLinkFunctions import validate_edf_fname, setup_eyelink, calibrate_eyelink
+
+# ***************************
+# ******* USER INPUTS *******
+# ***************************
+
+# Setup the subject info screen
+info = {'Session #': 1, 'Subject ID': 'Test', 'EyeLink': ['y','n'], 'EyeLink EDF': 'test.edf', '(1) Skip task instructions':['n', 'y']}
+dlg = gui.DlgFromDict(info, title = 'Real Time Pupillometry Fixation Experiment')
+# Find experiment date
+info['date'] = data.getDateStr()
+# Filename = Subject ID entered above
+sub_id = info['Subject ID']
+# EyeLink EDF filename
+tmp_str = info['EyeLink EDF']
+
+resolution = [1920, 1080] # CW: resolution in config file
+
 
 # *********************
 # *** MAIN FUNCTION ***
@@ -44,23 +57,6 @@ def main(task_name, behavioral_folder, eyelink_folder, block_length, max_num_blo
          dilation_quantile, constriction_quantile, peak_threshold, trough_threshold,
          constriction_threshold, dilation_threshold):
 
-    # ***************************
-    # ******* USER INPUTS *******
-    # ***************************
-
-    # Setup the subject info screen
-    info = {'Session #': 1, 'Subject ID': 'Test', 'EyeLink': ['y','n'], 'EyeLink EDF': 'test.edf', '(1) Skip task instructions':['n', 'y']}
-
-    dlg = gui.DlgFromDict(info, title = 'Real Time Pupillometry Fixation Experiment')
-
-    # Find experiment date
-    info['date'] = data.getDateStr()
-
-    # Filename = Subject ID entered above
-    sub_id = info['Subject ID']
-
-    # EyeLink EDF filename
-    tmp_str = info['EyeLink EDF']
 
     # *****************************************
     # *** MANAGE DATA FOLDERS AND FILENAMES ***
@@ -92,22 +88,18 @@ def main(task_name, behavioral_folder, eyelink_folder, block_length, max_num_blo
     # ***********************
 
     # Basic window to use later 
-    resolution = [1920, 1080] # CW: resolution in config file
     win = visual.Window(size = resolution, color = [0,0,0], monitor = 'testMonitor', fullscr = True, units ='cm')
     # Setup fixation cross
     fixation = visual.TextStim(win, text="+", color = 'black', pos = [0, 0], autoLog = False)
     # Create text screens to display later:
-    instructions = visual.TextStim(win, text='', color='white', pos=[0, 2])  #This is an empty instructions screen to be filled with text below
+    instructions = visual.TextStim(win, text='', color='black', pos=[0, 2])  #This is an empty instructions screen to be filled with text below
 
-    # *******************
-    # *** TASK TIMERS ***
-    # *******************
+    # ***********************
+    # ******* TIMERS ********
+    # ***********************
 
     block_timer = core.Clock() # Block timer
     general_timer = core.Clock() # Global timer
-    pupil_phase_IEI_timer = core.Clock() # Inter-event interval timer
-    random_IEI_timer = core.Clock() # Time for selecting random pupil times
-    pupil_sample_timer = core.Clock() # Pupil sample timer
 
     # ************************
     # *** INITIATE EYELINK ***
@@ -121,9 +113,11 @@ def main(task_name, behavioral_folder, eyelink_folder, block_length, max_num_blo
         
     elif info['EyeLink'] == 'n':
         dummy_mode = True
+        logging.log(level=logging.EXP,msg='Experiment run in dummy mode - no EyeLink')
+
 
    # CW: use_retina in config file 
-    setup_eyelink(dummy_mode, edf_fname)
+    setup_eyelink(win, dummy_mode, edf_fname)
     calibrate_eyelink(dummy_mode)
     el_tracker = pylink.getEYELINK()
 
@@ -137,20 +131,20 @@ def main(task_name, behavioral_folder, eyelink_folder, block_length, max_num_blo
                         num_random_events, IEI_duration_sec, peak_pupil_quantile,
                         trough_pupil_quantile, dilation_quantile, constriction_quantile,
                         peak_threshold, trough_threshold, dilation_threshold, constriction_threshold,
-                        online=True) # sets up stimulus decider object
+                        online=True, win=win) # sets up stimulus decider object
     
     # *******************************
     # *** Beginning of Experiment ***
     # *******************************
-    
+
     # Define instruction text
-    instructions_screens("Experiment is setup!\n\nLet's get started!")
+    instructions_screens(win, "Experiment is setup!\n\nLet's get started!")
     
     # Continue with task instructions
     if 'n' == info['(1) Skip task instructions']:
 
         # Instructions screen
-        general_instruction_screens()
+        general_instruction_screens(win, fixation)
     
     # ************************
     # *** Main Task Phases ***
@@ -170,10 +164,10 @@ def main(task_name, behavioral_folder, eyelink_folder, block_length, max_num_blo
         block_instruction = 'Starting '+ task_name + ' Block #' + str(block_counter) + "\n\nAre you ready?"
 
         # Display instructions
-        instructions_screens(block_instruction)
+        instructions_screens(win, block_instruction)
         
         # Block Trigger
-        block_trigger()
+        block_trigger(win)
         
         # Initialize variable
         decision_arr = []
@@ -185,15 +179,11 @@ def main(task_name, behavioral_folder, eyelink_folder, block_length, max_num_blo
         # Reset halfway logical 
         halfway_screen = False
         
-        # Reset pupil phase IEI timer
-        pupil_phase_IEI_timer.reset()
-    
         # Reset block timer
         block_timer.reset()
 
         # Wait block duration
         while block_timer.getTime() < block_length:
-            
             # Display a halfway completion screen
             if halfway_screen == False and block_timer.getTime() > block_length/2:
 
@@ -210,7 +200,7 @@ def main(task_name, behavioral_folder, eyelink_folder, block_length, max_num_blo
                 # Reset timer
                 general_timer.reset()
                 
-                # Present stimulus for target duration
+                # Present block update for target duration
                 while general_timer.getTime() < 2:
                     win.update()
 
@@ -238,17 +228,17 @@ def main(task_name, behavioral_folder, eyelink_folder, block_length, max_num_blo
     
                     # End experiment
                     if np.in1d(thisKey,['escape','p']):
-                        end_experiment()
+                        end_experiment(win)
             
             # Turn on fixation
             fixation.setAutoDraw(True)
             win.update()
-        
-            # Build search window
-            sd.build_search_window()
+            if not dummy_mode:
+                # Build search window
+                sd.build_search_window()
 
-            # Look for pupil phase events
-            decision_arr.append(sd.detect_events_online())
+                # Look for pupil phase events
+                decision_arr.append(sd.detect_events_online())
         
         # Log
         logging.log(level=logging.EXP,msg='All pupil_sample Duration Times: ' + str(sd.get_pupil_sample_duration_time()))
@@ -261,7 +251,7 @@ def main(task_name, behavioral_folder, eyelink_folder, block_length, max_num_blo
         win.update()
         
         # Show instruction screen
-        instructions_screens('Finished ' + task_name + ' Block #' + str(block_counter))
+        instructions_screens(win, 'Finished ' + task_name + ' Block #' + str(block_counter))
             
         # Add to block counter
         block_counter = block_counter + 1
@@ -271,8 +261,8 @@ def main(task_name, behavioral_folder, eyelink_folder, block_length, max_num_blo
     # *******************************
     
     # Show instruction screen
-    instructions_screens("Exiting task! \n\nAn experimenter will communicate with you shortly.")
-    end_experiment()
+    instructions_screens(win, "Exiting task! \n\nAn experimenter will communicate with you shortly.")
+    end_experiment(win)
             
 if __name__ == "__main__":
 

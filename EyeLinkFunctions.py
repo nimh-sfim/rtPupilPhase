@@ -27,7 +27,8 @@ def validate_edf_fname(edf_fname):
 
     return edf_fname, state, message
 
-def setup_eyelink(dummy_mode, edf_fname, use_retina=True): 
+def setup_eyelink(win, dummy_mode, edf_fname, use_retina=True): 
+
     # Note: The script below is provided by SR Research, Inc.
      # Step 1: Connect to the EyeLink Host PC
 

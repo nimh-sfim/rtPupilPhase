@@ -19,13 +19,13 @@ def set_up_directories( behavioral_folder, eyelink_folder):
     _thisDir = os.path.dirname(os.path.abspath(__file__))
     os.chdir(_thisDir)
 
-def clear_screen():
+def clear_screen(win):
     """ Clear window """ 
     
-    win.fillColor = genv.getBackgroundColor()
+    win.fillColor = (116,116,116)
     win.flip()
 
-def terminate_task():
+def terminate_task(win):
     """ Terminate the task gracefully and retrieve the EDF data file """
     
     el_tracker = pylink.getEYELINK()
@@ -35,7 +35,7 @@ def terminate_task():
     
         if error == pylink.TRIAL_OK:
             # Stop EyeLink recording
-            abort_trial()
+            abort_trial(win)
     
         el_tracker.setOfflineMode()
         el_tracker.sendCommand('clear_screen 0')
@@ -48,7 +48,7 @@ def terminate_task():
     core.quit()
     sys.exit()
     
-def abort_trial():   
+def abort_trial(win):   
     """Ends recording abruptly"""
     
     el_tracker = pylink.getEYELINK()
@@ -65,7 +65,7 @@ def abort_trial():
     
     return pylink.TRIAL_ERROR
 
-def end_experiment() -> None:
+def end_experiment(win) -> None:
     """End experiment"""
     el_tracker = pylink.getEYELINK()
 
@@ -78,7 +78,7 @@ def end_experiment() -> None:
     el_tracker.stopRecording()
     
     # Terminate task
-    terminate_task()
+    terminate_task(win)
     core.wait(2)
     win.close()
    
@@ -98,16 +98,17 @@ def quit_task(win) -> None:
             if thisKey in ['p', 'escape']:
                 end_experiment(win)
 
-def block_trigger(genv, win):
+def block_trigger(win):
     """Display block trigger screen"""
     el_tracker = pylink.getEYELINK()
 
     # Log
     logging.log(level=logging.EXP,msg='Waiting for block trigger')
     el_tracker.sendMessage('Waiting for block trigger')
-        
+    
+    scn_width, scn_height = win.size
     # On-screen text
-    onscreen_instructions = visual.TextStim(win, text='Waiting to start. Standby...', color = genv.getForegroundColor(), wrapWidth = scn_width/2) 
+    onscreen_instructions = visual.TextStim(win, text='Waiting to start. Standby...', color = 'black', wrapWidth = scn_width/2) 
     onscreen_instructions.draw()
     win.flip()
 
@@ -116,13 +117,13 @@ def block_trigger(genv, win):
 
     # If pressed escape key, quit task
     if np.in1d(key,['escape','p']):
-       end_experiment()
+       end_experiment(win)
        
     # Log
     logging.log(level=logging.EXP,msg='Block trigger received')
     el_tracker.sendMessage('Block trigger received')
 
-def instruction_continue():
+def instruction_continue(win):
     """Continue/proceed from instruction screen"""
 
     # Wait for key press
@@ -130,14 +131,14 @@ def instruction_continue():
 
     # End experiment
     if np.in1d(key,['escape','p']):
-        end_experiment()
+        end_experiment(win)
     
-def instructions_screens(instruction:str): 
+def instructions_screens(win, instruction:str): 
     """Function presents all the instructions needed for the task"""
 
     scn_width, scn_height = win.size
     # Setup text
-    task_instructions = visual.TextStim(win, instruction, color = genv.getForegroundColor(), wrapWidth = scn_width/2, units = 'cm')
+    task_instructions = visual.TextStim(win, instruction, color = 'black', wrapWidth = scn_width/2, units = 'cm')
     
     # Clear window
     clear_screen(win)
@@ -147,11 +148,10 @@ def instructions_screens(instruction:str):
     win.flip()   
     
     # Continue or quit from instructions
-    instruction_continue()
+    instruction_continue(win)
 
-def general_instruction_screens():
+def general_instruction_screens(win, fixation):
     """Present the task instructions"""
-    
     # Log
     logging.log(level=logging.EXP,msg='General task instructions')
 
@@ -168,4 +168,4 @@ def general_instruction_screens():
     win.flip()
 
     # Continue or quit from instructions
-    instruction_continue()
+    instruction_continue(win)

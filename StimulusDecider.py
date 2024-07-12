@@ -1,6 +1,6 @@
 import numpy as np
 from scipy.signal import find_peaks
-from psychopy import logging
+from psychopy import logging, core
 import pylink
 
 from PsychoPy_funcs import quit_task
@@ -142,7 +142,7 @@ class StimulusDecider():
         peak_pupil_quantile=0.75, trough_pupil_quantile=0.25, 
         dilation_quantile=0.99, constriction_quantile=0.01, 
         peak_threshold_var = 0., trough_threshold_var = 0., dilation_threshold=50., 
-        constriction_threshold=-50., online=False
+        constriction_threshold=-50., online=False, win=None
     ):
         """
         Sets up a StimulusDecider object with defaults that reflect options from Kronemer et al., 2024. 
@@ -189,6 +189,8 @@ class StimulusDecider():
             must be smaller than this value to be identified as a constriction 
         online : boolean 
             whether object is used in real time data collection or in simulations    
+        win : PsychoPy Window
+            screen to be updated in real-time 
         """
     
         self._ms_per_sample = ms_per_sample
@@ -223,6 +225,12 @@ class StimulusDecider():
         self._idx_event = 0
         self._online = online
         self._task_name = task_name
+        self._win = win
+
+        if self._online: 
+            self._pupil_phase_IEI_timer = core.Clock() # Inter-event interval timer
+            self._random_IEI_timer = core.Clock() # Time for selecting random pupil times
+            self._pupil_sample_timer = core.Clock() # Pupil sample timer
 
     def update_windows(self, sample, duration = None): 
         """ 
@@ -620,7 +628,7 @@ class StimulusDecider():
         
         """
         el_tracker = pylink.getEYELINK()
-        if pupil_phase_IEI_event_timer.getTime() > IEI_jitter_ms/1000: 
+        if self._pupil_phase_IEI_event_timer.getTime() > IEI_jitter_ms/1000: 
             self.accepted_pupil_event() 
             self.reset_search_window()
             self.set_current_event_idx(0)
@@ -675,7 +683,7 @@ class StimulusDecider():
         el_tracker.sendMessage('Accepted Pupil Event')
         
         # Reset pupil phase IEI timer
-        pupil_phase_IEI_timer.reset()
+        self._pupil_phase_IEI_timer.reset()
         
         # Set boolean to True
         self._accepted_pupil_event_bool = True
@@ -706,11 +714,11 @@ class StimulusDecider():
             self.set_pupil_phase_thresholds(self._baseline_window)
         
         # Log random event if the minimum random IEI is exceed      
-        if random_IEI_timer.getTime() > self._random_event_time_sec:
+        if self._random_IEI_timer.getTime() > self._random_event_time_sec:
         
             # If IEI has been exceed (Note: The IEI timer gets reset in the accepted_pupil_event; 
             # no reset will happen if no stimulus is shown)
-            if pupil_phase_IEI_timer.getTime() > self._IEI_duration_sec:
+            if self._pupil_phase_IEI_timer.getTime() > self._IEI_duration_sec:
                 
                 # Define idx extrema
                 self._idx_event = 3
@@ -723,8 +731,8 @@ class StimulusDecider():
                 self.accepted_pupil_event()
 
                 # Reset timers
-                random_IEI_timer.reset()
-                general_timer.reset()
+                self._random_IEI_timer.reset()
+                #self._general_timer.reset() # CW: why general timer here? 
                 
                 return self._idx_event
             
@@ -738,7 +746,7 @@ class StimulusDecider():
         if self._idx_event!=0:
             
             # Confirm pupil phase IEI exceeded
-            if pupil_phase_IEI_timer.getTime() > self._IEI_duration_sec:
+            if self._pupil_phase_IEI_timer.getTime() > self._IEI_duration_sec:
                 
                 # Accepted event
                 self.accepted_pupil_event()
@@ -749,7 +757,7 @@ class StimulusDecider():
                 return idx_to_return
             
             # If IEI is not exceeded 
-            elif pupil_phase_IEI_timer.getTime() < self._IEI_duration_sec:
+            elif self._pupil_phase_IEI_timer.getTime() < self._IEI_duration_sec:
                 
                 # Not an accepted event
                 self._accepted_pupil_event_bool = False
@@ -785,7 +793,6 @@ class StimulusDecider():
         """Add the pupil sample to baseline and search window. 
         
         """
-        
         el_tracker = pylink.getEYELINK()
 
         # Initialize/reset pupil_sample variable
@@ -797,13 +804,15 @@ class StimulusDecider():
         p_time = float("nan")
         
         # Reset pupil sample timer
-        pupil_sample_timer.reset()
+        
+        self._pupil_sample_timer.reset()
         
         # Keep adding pupil values until pupil_sample is long enough      
         while len(pupil_sample) < self._pupil_sample_duration_ms//self._ms_per_sample:
         
             # Update window
-            win.update()
+            if self._win is not None:
+                self._win.update()
         
             # Get the latest EyeLink sample        
             self._new_sample = el_tracker.getNewestSample()
@@ -827,7 +836,7 @@ class StimulusDecider():
                     pupil_sample_time.append(p_time)
         
             # Quit task
-            quit_task()
+            quit_task(self._win)
         
             # Replace old pupil value with new
             self._old_sample = self._new_sample
@@ -837,23 +846,23 @@ class StimulusDecider():
         self._search_window_sample_times.extend(pupil_sample_time)
         
         # Store duration of pupil sample in time
-        self._pupil_sample_duration_time.append(pupil_sample_timer.getTime())
+        self._pupil_sample_duration_time.append(self._pupil_sample_timer.getTime())
         
         # Add pupil sample to baseline window
         self._baseline_window.extend(pupil_sample)
 
-def get_pupil_sample_duration_time(self):
-    """Used to log pupil sample duration array."""
-    return self._pupil_sample_duration_time
+    def get_pupil_sample_duration_time(self):
+        """Used to log pupil sample duration array."""
+        return self._pupil_sample_duration_time
 
-def get_search_window(self): 
-    return self._search_window
+    def get_search_window(self): 
+        return self._search_window
 
-def get_search_window_times(self):
-    return self._search_window_sample_times
+    def get_search_window_times(self):
+        return self._search_window_sample_times
 
-def get_baseline_window(self):
-    return self._baseline_window
+    def get_baseline_window(self):
+        return self._baseline_window
 
-def get_search_window_fit_vals(self): 
-    return self._search_window_model_fits
+    def get_search_window_fit_vals(self): 
+        return self._search_window_model_fits
