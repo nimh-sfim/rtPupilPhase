@@ -2,6 +2,7 @@ import os
 import pylink
 import sys
 from psychopy import visual, logging, core, event
+import config 
 
 import numpy as np
 
@@ -22,7 +23,7 @@ def set_up_directories( behavioral_folder, eyelink_folder):
 def clear_screen(win):
     """ Clear window """ 
     
-    win.fillColor = (116,116,116)
+    win.fillColor = config.bg_color
     win.flip()
 
 def terminate_task(win):
@@ -59,7 +60,7 @@ def abort_trial(win):
         el_tracker.stopRecording()  
     
     clear_screen(win)
-    bgcolor_RGB = (116, 116, 116)
+    bgcolor_RGB = config.bg_color
     el_tracker.sendMessage('!V CLEAR %d %d %d' % bgcolor_RGB)
     el_tracker.sendMessage('TRIAL_RESULT %d' % pylink.TRIAL_ERROR)
     
@@ -108,7 +109,7 @@ def block_trigger(win):
     
     scn_width, scn_height = win.size
     # On-screen text
-    onscreen_instructions = visual.TextStim(win, text='Waiting to start. Standby...', color = 'black', wrapWidth = scn_width/2) 
+    onscreen_instructions = visual.TextStim(win, text='Waiting to start. Standby...', color = config.text_color, wrapWidth = scn_width/2) 
     onscreen_instructions.draw()
     win.flip()
 
@@ -138,7 +139,7 @@ def instructions_screens(win, instruction:str):
 
     scn_width, scn_height = win.size
     # Setup text
-    task_instructions = visual.TextStim(win, instruction, color = 'black', wrapWidth = scn_width/2, units = 'cm')
+    task_instructions = visual.TextStim(win, instruction, color = config.text_color, wrapWidth = scn_width/2, units = 'cm')
     
     # Clear window
     clear_screen(win)
@@ -159,7 +160,7 @@ def general_instruction_screens(win, fixation):
     instructions = "Please fixate on the fixation point at all times."
     
     # Setup instructions
-    task_instructions = visual.TextStim(win, text='', color='black', pos=[0, 5], units='cm')
+    task_instructions = visual.TextStim(win, text='', color=config.text_color, pos=[0, 5], units='cm')
 
     # Draw the text
     task_instructions.setText(instructions)

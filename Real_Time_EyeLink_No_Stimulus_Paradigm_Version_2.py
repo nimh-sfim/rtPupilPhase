@@ -22,6 +22,7 @@ import time
 import pylink
 import os
 import argparse
+import config 
 
 # EyeLink Functions
 from EyeLinkCoreGraphicsPsychoPy import EyeLinkCoreGraphicsPsychoPy
@@ -43,9 +44,6 @@ info['date'] = data.getDateStr()
 sub_id = info['Subject ID']
 # EyeLink EDF filename
 tmp_str = info['EyeLink EDF']
-
-resolution = [1920, 1080] # CW: resolution in config file
-
 
 # *********************
 # *** MAIN FUNCTION ***
@@ -88,11 +86,11 @@ def main(task_name, behavioral_folder, eyelink_folder, block_length, max_num_blo
     # ***********************
 
     # Basic window to use later 
-    win = visual.Window(size = resolution, color = [0,0,0], monitor = 'testMonitor', fullscr = True, units ='cm')
+    win = visual.Window(size = config.resolution, color = [0,0,0], monitor = 'testMonitor', fullscr = True, units ='cm')
     # Setup fixation cross
-    fixation = visual.TextStim(win, text="+", color = 'black', pos = [0, 0], autoLog = False)
+    fixation = visual.TextStim(win, text="+", color = config.text_color, pos = [0, 0], autoLog = False)
     # Create text screens to display later:
-    instructions = visual.TextStim(win, text='', color='black', pos=[0, 2])  #This is an empty instructions screen to be filled with text below
+    instructions = visual.TextStim(win, text='', color=config.text_color, pos=[0, 2])  #This is an empty instructions screen to be filled with text below
 
     # ***********************
     # ******* TIMERS ********
@@ -115,9 +113,7 @@ def main(task_name, behavioral_folder, eyelink_folder, block_length, max_num_blo
         dummy_mode = True
         logging.log(level=logging.EXP,msg='Experiment run in dummy mode - no EyeLink')
 
-
-   # CW: use_retina in config file 
-    setup_eyelink(win, dummy_mode, edf_fname)
+    setup_eyelink(win, dummy_mode, edf_fname, config.use_retina)
     calibrate_eyelink(dummy_mode)
     el_tracker = pylink.getEYELINK()
 
@@ -191,7 +187,7 @@ def main(task_name, behavioral_folder, eyelink_folder, block_length, max_num_blo
                 halfway_screen = True
 
                 # Setup progress screen
-                progress_screen = visual.TextStim(win, text="You completed 50% of this block!", color='black')
+                progress_screen = visual.TextStim(win, text="You completed 50% of this block!", color=config.text_color)
 
                 # Show progress screen/ turn off fixation
                 fixation.setAutoDraw(False)
