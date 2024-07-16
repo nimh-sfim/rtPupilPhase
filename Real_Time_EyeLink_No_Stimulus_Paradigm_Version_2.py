@@ -119,7 +119,7 @@ def main(task_name, behavioral_folder, eyelink_folder, block_length, max_num_blo
         logging.log(level=logging.EXP,msg='Experiment run in dummy mode - no EyeLink')
 
     setup_eyelink(win, dummy_mode, edf_fname)
-    calibrate_eyelink(dummy_mode)
+    calibrate_eyelink(win, dummy_mode)
     el_tracker = pylink.getEYELINK()
 
     # Calibration task constants

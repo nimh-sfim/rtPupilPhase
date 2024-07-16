@@ -367,7 +367,7 @@ class StimulusDecider():
             mean of pupil sample is not 0, suggesting that the pupil sample may not have
             been demeaned prior to running method 
         """
-        assert np.mean(demeaned_pupil_sample)==0.0, "Pupil sample may not be demeaned"
+        assert np.isclose(np.mean(demeaned_pupil_sample),0.0), "Pupil sample may not be demeaned"
         sample_window_fit_coef = np.polyfit(list(range(1,len(demeaned_pupil_sample)+1)),demeaned_pupil_sample, 2)
 
         # Find last sample fit value
@@ -686,8 +686,7 @@ class StimulusDecider():
         valid_window = self.validate_search_window(self._max_search_window_duration_ms//config.ms_per_sample)
         if not valid_window:
             return 0
-        
-        demeaned_search_window = self.demean_search_window(self._search_window)
+        demeaned_search_window = list(self._search_window - np.mean(self._search_window))
 
         # Reset pupil phase pupil size and pupil size derivative thresholds - once the minimum baseline duration has been acquired
         if len(self._baseline_window) > round(self._baseline_duration_ms//config.ms_per_sample):
@@ -756,18 +755,6 @@ class StimulusDecider():
         # Not an accepted event    
         self._accepted_pupil_event_bool = False
         return 0
-    
-    def demean_search_window(search_window: np.array) -> np.ndarray:
-        """Calculate the mean of the pupil_sample and subtract from all data samples.
-        
-        Returns 
-        ----------
-        list 
-            demeaned window. Array will have mean of 0. 
-
-        """
-
-        return list(search_window - np.mean(search_window))
 
     def build_search_window(self) -> float:
         """Add the pupil sample to baseline and search window. 
@@ -796,24 +783,26 @@ class StimulusDecider():
         
             # Get the latest EyeLink sample        
             self._new_sample = el_tracker.getNewestSample()
+            if self._new_sample is not None:
+                  if self._old_sample is not None:
 
             # Check there is a new pupil value and that it is not the first pupil sample 
-            if self._new_sample is not None and self._old_sample is not None:
+           # if self._new_sample is not None and self._old_sample is not None:
                     
-                # Check the new and old pupil values are not the same
-                if self._new_sample.getTime() != self._old_sample.getTime():
+                    # Check the new and old pupil values are not the same
+                    if self._new_sample.getTime() != self._old_sample.getTime():
 
-                    # Find the pupil size and time
-                    p_size = self._new_sample.getRightEye().getPupilSize()
-                    p_time = self._new_sample.getTime()
-                    
-                    # Replace pupil size of 0 with "nan"
-                    if p_size == 0:
-                        p_size = float("nan")
-                    
-                    # Add to pupil_sample
-                    pupil_sample.append(p_size) # Add samples to pupil_sample
-                    pupil_sample_time.append(p_time)
+                        # Find the pupil size and time
+                        p_size = self._new_sample.getRightEye().getPupilSize()
+                        p_time = self._new_sample.getTime()
+                        
+                        # Replace pupil size of 0 with "nan"
+                        if p_size == 0:
+                            p_size = float("nan")
+                        
+                        # Add to pupil_sample
+                        pupil_sample.append(p_size) # Add samples to pupil_sample
+                        pupil_sample_time.append(p_time)
         
             # Quit task
             quit_task(self._win)

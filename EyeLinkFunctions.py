@@ -201,13 +201,13 @@ def setup_eyelink(win, dummy_mode, edf_fname):
     # Request Pylink to use the PsychoPy window we opened above for calibration
     pylink.openGraphicsEx(genv)
 
-def calibrate_eyelink(dummy_mode): 
+def calibrate_eyelink(win, dummy_mode): 
     # Note: The script below is provided by SR Research, Inc.
     el_tracker = pylink.getEYELINK()
     if not dummy_mode: 
          # Gaze calibration
         task_msg = 'Press O to calibrate tracker'
-        instructions_screens(task_msg)
+        instructions_screens(win, task_msg)
         try:
             el_tracker.doTrackerSetup()
             
