@@ -1,6 +1,6 @@
-simulations/testing.ipynb
-simulations/analysis/
+testing.ipynb
 EyeLinkCoreGraphicsPsychoPy.py
+utils/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
