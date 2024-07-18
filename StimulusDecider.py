@@ -479,7 +479,8 @@ class StimulusDecider():
             if diff_fit[-1] > 0 and demeaned_search_window[-1] < self._trough_threshold_var:
             
                 if self._online:
-                    self.log_found_event_live(kind = "trough")
+                    self.log_found_event_live(kind = "trough", demeaned_search_window=demeaned_search_window, 
+                                              diff_fit=diff_fit)
                 else: 
                     trough_events.update_data(((pupil_sample_num+1)*samples_in_pupil_sample), current_time, 
                                     self.get_search_window()[-1], diff_fit[-1])
@@ -490,7 +491,8 @@ class StimulusDecider():
             elif diff_fit[-1] < 0 and demeaned_search_window[-1] > self._peak_threshold_var:
                 
                 if self._online:
-                    self.log_found_event_live(kind = "peak")
+                    self.log_found_event_live(kind = "peak", demeaned_search_window=demeaned_search_window, 
+                                              diff_fit=diff_fit)
                 else: 
                     peak_events.update_data(((pupil_sample_num+1)*samples_in_pupil_sample), current_time, 
                                     self.get_search_window()[-1], diff_fit[-1])
@@ -501,7 +503,8 @@ class StimulusDecider():
             elif diff_fit[-1] > self._dilation_threshold:
                 
                 if self._online:
-                    self.log_found_event_live(kind = "dilation")
+                    self.log_found_event_live(kind = "dilation", demeaned_search_window=demeaned_search_window, 
+                                              diff_fit=diff_fit)
                 else: 
                     dilation_events.update_data(((pupil_sample_num+1)*samples_in_pupil_sample), current_time, 
                                     self.get_search_window()[-1], diff_fit[-1])
@@ -512,7 +515,8 @@ class StimulusDecider():
             elif diff_fit[-1] < self._constriction_threshold:
                 
                 if self._online:
-                    self.log_found_event_live(kind = "constriction")
+                    self.log_found_event_live(kind = "constriction", demeaned_search_window=demeaned_search_window, 
+                                              diff_fit=diff_fit)
                 else: 
                     constriction_events.update_data(((pupil_sample_num+1)*samples_in_pupil_sample), current_time, 
                                     self.get_search_window()[-1], diff_fit[-1])
@@ -690,7 +694,7 @@ class StimulusDecider():
 
         # Reset pupil phase pupil size and pupil size derivative thresholds - once the minimum baseline duration has been acquired
         if len(self._baseline_window) > round(self._baseline_duration_ms//config.ms_per_sample):
-            self.set_pupil_phase_thresholds(self._baseline_window)
+            self.set_pupil_phase_thresholds()
         
         # Log random event if the minimum random IEI is exceed      
         if self._random_IEI_timer.getTime() > self._random_event_time_sec:
@@ -701,7 +705,8 @@ class StimulusDecider():
                 
                 # Define idx extrema
                 self._idx_event = 3
-                
+                idx_to_return = self._idx_event
+                self._idx_event = 0
                 # Log
                 logging.log(level=logging.EXP,msg='Random Event')
                 el_tracker.sendMessage('Random Event') 
@@ -711,22 +716,19 @@ class StimulusDecider():
 
                 # Reset timers
                 self._random_IEI_timer.reset()
-                #self._general_timer.reset() # CW: why general timer here? 
-                
-                return self._idx_event
+                #self._general_timer.reset() 
+                return idx_to_return
+                # return self._idx_event
             
             return 0
         
         # Find peaks (local maxima), troughs (local minima), dilation (dilation), and constriction (constriction) events
         # Index extrema dictionary: peak = 1; dilation = 2; trough = -1; constriction = -2; random = 3
         self._idx_event = self.find_pupil_phase_event(demeaned_search_window)
-        
         # If a pupil phase event was found
         if self._idx_event!=0:
-            
             # Confirm pupil phase IEI exceeded
             if self._pupil_phase_IEI_timer.getTime() > self._IEI_duration_sec:
-                
                 # Accepted event
                 self.accepted_pupil_event()
                 idx_to_return = self._idx_event
@@ -740,7 +742,7 @@ class StimulusDecider():
                 
                 # Not an accepted event
                 self._accepted_pupil_event_bool = False
-                
+                self._idx_event = 0
                 # Log
                 logging.log(level=logging.EXP,msg='Within IEI - Skipping this Pupil Event')
                 el_tracker.sendMessage('Within IEI - Skipping this Pupil Event')

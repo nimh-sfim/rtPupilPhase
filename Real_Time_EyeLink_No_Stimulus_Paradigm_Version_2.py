@@ -239,7 +239,6 @@ def main(task_name, behavioral_folder, eyelink_folder, block_length, max_num_blo
 
                 # Look for pupil phase events
                 decision_arr.append(sd.detect_events_online())
-        
         # Log
         logging.log(level=logging.EXP,msg='All pupil_sample Duration Times: ' + str(sd.get_pupil_sample_duration_time()))
         logging.log(level=logging.EXP,msg='All Search Window Detected Pupil Phase Events: ' + str(decision_arr))
