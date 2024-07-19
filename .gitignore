@@ -1,7 +1,9 @@
 testing.ipynb
 EyeLinkCoreGraphicsPsychoPy.py
 utils/*
-
+behav/*
+behavioral/*
+analysis/*
 # Byte-compiled / optimized / DLL files
 __pycache__/
 .pytest_cache
