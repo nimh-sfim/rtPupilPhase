@@ -852,34 +852,34 @@ end
 % Z-score pupil data
 zscore_group_peak_pupil = zscore(accepted_mice_mean_peak_event_pupil_epochs,[],2);
 zscore_group_trough_pupil = zscore(accepted_mice_mean_trough_event_pupil_epochs,[],2);
-zscore_group_rising_pupil = zscore(accepted_mice_mean_dilation_event_pupil_epochs,[],2);
-zscore_group_falling_pupil = zscore(accepted_mice_mean_constriction_event_pupil_epochs,[],2);
+zscore_group_dilation_pupil = zscore(accepted_mice_mean_dilation_event_pupil_epochs,[],2);
+zscore_group_constriction_pupil = zscore(accepted_mice_mean_constriction_event_pupil_epochs,[],2);
 zscore_group_random_pupil = zscore(accepted_mice_mean_random_event_pupil_epochs,[],2);
 
 % Average across mice
 zscore_group_mean_peak_pupil = nanmean(zscore_group_peak_pupil,1);
 zscore_group_mean_trough_pupil = nanmean(zscore_group_trough_pupil,1);
-zscore_group_mean_rising_pupil = nanmean(zscore_group_rising_pupil,1);
-zscore_group_mean_falling_pupil = nanmean(zscore_group_falling_pupil,1);
+zscore_group_mean_dilation_pupil = nanmean(zscore_group_dilation_pupil,1);
+zscore_group_mean_constriction_pupil = nanmean(zscore_group_constriction_pupil,1);
 zscore_group_mean_random_pupil = nanmean(zscore_group_random_pupil,1);
 
 group_mean_peak_pupil = nanmean(accepted_mice_mean_peak_event_pupil_epochs,1);
 group_mean_trough_pupil = nanmean(accepted_mice_mean_trough_event_pupil_epochs,1);
-group_mean_rising_pupil = nanmean(accepted_mice_mean_dilation_event_pupil_epochs,1);
-group_mean_falling_pupil = nanmean(accepted_mice_mean_constriction_event_pupil_epochs,1);
+group_mean_dilation_pupil = nanmean(accepted_mice_mean_dilation_event_pupil_epochs,1);
+group_mean_constriction_pupil = nanmean(accepted_mice_mean_constriction_event_pupil_epochs,1);
 group_mean_random_pupil = nanmean(accepted_mice_mean_random_event_pupil_epochs,1);
 
 % Standard deviation across mice
 zscore_group_SEM_peak_pupil = std(zscore_group_peak_pupil,0,1)/sqrt(size(zscore_group_peak_pupil,1));
 zscore_group_SEM_trough_pupil = std(zscore_group_trough_pupil,0,1)/sqrt(size(zscore_group_trough_pupil,1));
-zscore_group_SEM_rising_pupil = std(zscore_group_rising_pupil,0,1)/sqrt(size(zscore_group_rising_pupil,1));
-zscore_group_SEM_falling_pupil = std(zscore_group_falling_pupil,0,1)/sqrt(size(zscore_group_falling_pupil,1));
+zscore_group_SEM_dilation_pupil = std(zscore_group_dilation_pupil,0,1)/sqrt(size(zscore_group_dilation_pupil,1));
+zscore_group_SEM_constriction_pupil = std(zscore_group_constriction_pupil,0,1)/sqrt(size(zscore_group_constriction_pupil,1));
 zscore_group_SEM_random_pupil = std(zscore_group_random_pupil,0,1)/sqrt(size(zscore_group_random_pupil,1));
 
 group_SEM_peak_pupil = std(accepted_mice_mean_peak_event_pupil_epochs,0,1)/sqrt(size(accepted_mice_mean_peak_event_pupil_epochs,1));
 group_SEM_trough_pupil = std(accepted_mice_mean_trough_event_pupil_epochs,0,1)/sqrt(size(accepted_mice_mean_trough_event_pupil_epochs,1));
-group_SEM_rising_pupil = std(accepted_mice_mean_dilation_event_pupil_epochs,0,1)/sqrt(size(accepted_mice_mean_dilation_event_pupil_epochs,1));
-group_SEM_falling_pupil = std(accepted_mice_mean_constriction_event_pupil_epochs,0,1)/sqrt(size(accepted_mice_mean_constriction_event_pupil_epochs,1));
+group_SEM_dilation_pupil = std(accepted_mice_mean_dilation_event_pupil_epochs,0,1)/sqrt(size(accepted_mice_mean_dilation_event_pupil_epochs,1));
+group_SEM_constriction_pupil = std(accepted_mice_mean_constriction_event_pupil_epochs,0,1)/sqrt(size(accepted_mice_mean_constriction_event_pupil_epochs,1));
 group_SEM_random_pupil = std(accepted_mice_mean_random_event_pupil_epochs,0,1)/sqrt(size(accepted_mice_mean_random_event_pupil_epochs,1));
 
 % Save Data
@@ -895,7 +895,7 @@ xlim_ms = 1500;
 xlim_samples = round(xlim_ms/ms_per_sample);
 
 % Pupil events
-pupil_events = {'rising','peak','falling','trough','random'};
+pupil_events = {'dilation','peak','constriction','trough','random'};
 
 % Color values
 color_values = {'m','r','c','b','g'};
@@ -972,21 +972,21 @@ zero_line = plot([-xlim_samples, xlim_samples], [0, 0], 'k')
 % Mean timecourse
 plot(timevector, zscore_group_mean_peak_pupil,'r','LineWidth',2)
 plot(timevector, zscore_group_mean_trough_pupil,'b','LineWidth',2)
-plot(timevector, zscore_group_mean_rising_pupil,'m','LineWidth',2)
-plot(timevector, zscore_group_mean_falling_pupil,'c','LineWidth',2)
+plot(timevector, zscore_group_mean_dilation_pupil,'m','LineWidth',2)
+plot(timevector, zscore_group_mean_constriction_pupil,'c','LineWidth',2)
 plot(timevector, zscore_group_mean_random_pupil,'g','LineWidth',2)
 
 % Error timecourse
 plot(timevector,zscore_group_mean_peak_pupil + zscore_group_SEM_peak_pupil,'r')
 plot(timevector,zscore_group_mean_trough_pupil + zscore_group_SEM_trough_pupil,'b')
-plot(timevector,zscore_group_mean_rising_pupil + zscore_group_SEM_rising_pupil,'m')
-plot(timevector,zscore_group_mean_falling_pupil + zscore_group_SEM_falling_pupil,'c')
+plot(timevector,zscore_group_mean_dilation_pupil + zscore_group_SEM_dilation_pupil,'m')
+plot(timevector,zscore_group_mean_constriction_pupil + zscore_group_SEM_constriction_pupil,'c')
 plot(timevector,zscore_group_mean_random_pupil + zscore_group_SEM_random_pupil,'g')
 
 plot(timevector,zscore_group_mean_peak_pupil - zscore_group_SEM_peak_pupil,'r')
 plot(timevector,zscore_group_mean_trough_pupil - zscore_group_SEM_trough_pupil,'b')
-plot(timevector,zscore_group_mean_rising_pupil - zscore_group_SEM_rising_pupil,'m')
-plot(timevector,zscore_group_mean_falling_pupil - zscore_group_SEM_falling_pupil,'c')
+plot(timevector,zscore_group_mean_dilation_pupil - zscore_group_SEM_dilation_pupil,'m')
+plot(timevector,zscore_group_mean_constriction_pupil - zscore_group_SEM_constriction_pupil,'c')
 plot(timevector,zscore_group_mean_random_pupil - zscore_group_SEM_random_pupil,'g')
 
 % Save figure
@@ -1021,21 +1021,21 @@ zero_line = plot([-xlim_samples, xlim_samples], [0, 0], 'k')
 % Mean timecourse
 plot(timevector, group_mean_peak_pupil,'r','LineWidth',2)
 plot(timevector, group_mean_trough_pupil,'b','LineWidth',2)
-plot(timevector, group_mean_rising_pupil,'m','LineWidth',2)
-plot(timevector, group_mean_falling_pupil,'c','LineWidth',2)
+plot(timevector, group_mean_dilation_pupil,'m','LineWidth',2)
+plot(timevector, group_mean_constriction_pupil,'c','LineWidth',2)
 plot(timevector, group_mean_random_pupil,'g','LineWidth',2)
 
 % Error timecourse
 plot(timevector,group_mean_peak_pupil + group_SEM_peak_pupil,'r')
 plot(timevector,group_mean_trough_pupil + group_SEM_trough_pupil,'b')
-plot(timevector,group_mean_rising_pupil + group_SEM_rising_pupil,'m')
-plot(timevector,group_mean_falling_pupil + group_SEM_falling_pupil,'c')
+plot(timevector,group_mean_dilation_pupil + group_SEM_dilation_pupil,'m')
+plot(timevector,group_mean_constriction_pupil + group_SEM_constriction_pupil,'c')
 plot(timevector,group_mean_random_pupil + group_SEM_random_pupil,'g')
 
 plot(timevector,group_mean_peak_pupil - group_SEM_peak_pupil,'r')
 plot(timevector,group_mean_trough_pupil - group_SEM_trough_pupil,'b')
-plot(timevector,group_mean_rising_pupil - group_SEM_rising_pupil,'m')
-plot(timevector,group_mean_falling_pupil - group_SEM_falling_pupil,'c')
+plot(timevector,group_mean_dilation_pupil - group_SEM_dilation_pupil,'m')
+plot(timevector,group_mean_constriction_pupil - group_SEM_constriction_pupil,'c')
 plot(timevector,group_mean_random_pupil - group_SEM_random_pupil,'g')
 
 % Save figure
