@@ -63,7 +63,7 @@ class StimulusDecider():
         most recent EyeLink sample (collected in real time)
     old_sample : obj
         previous Eyelink sample (collected in real time)
-    pupil_sample_duration_time : list 
+    pupil_sample_duration_time :  list
         durations of pupil samples collected in real time 
     peak_count : int
         number of peaks identified in real time

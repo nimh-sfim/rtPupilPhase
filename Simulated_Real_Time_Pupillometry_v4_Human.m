@@ -24,7 +24,6 @@ root_path = pwd;
 % Add paths (Note: Paths are added that houses functions used for pupil
 % preprocessing and extracting saccade and microsaccade occurrences)
 addpath(fullfile(root_path,'utils'))
-%addpath(genpath(fullfile(root_path,'Real_Time_Perception_Study/Analysis/Analysis_Code/EyeLink_Analysis')))
 
 %% Parameters
 
@@ -125,7 +124,7 @@ for human = 1:length(subject_list)
     disp(['Running subject ', subID,'...'])
 
     % Data directory
-    data_dir = fullfile(root_path,'data', 'human');
+    data_dir = fullfile(root_path,'data', 'human',subID,'EyeLink/');
     
     % Output directory 
     output_dir = fullfile(root_path,'analysis','subject_analysis', 'human',subID);
@@ -687,7 +686,7 @@ for human = 1:length(subject_list)
         end
     
         % Rename pupil data to affiliate with block
-        eval(['Block_',num2str(block),'_pupil_data = all_block_pupil_data;'])
+        eval(['Block_',num2str(block),'_pupil_data = block_pupil_data;'])
         
         %% Pupil Data Preprocessing
         
@@ -1149,8 +1148,8 @@ for human = 1:length(subject_list)
     % Plot pupil timecourses
     plot(timevector, mean_accepted_peak_event_pupil_epochs,'r','LineWidth',2)
     plot(timevector, mean_accepted_trough_event_pupil_epochs,'b','LineWidth',2) 
-    plot(timevector, mean_accepted_rising_event_pupil_epochs,'m','LineWidth',2)
-    plot(timevector, mean_accepted_falling_event_pupil_epochs,'c','LineWidth',2)
+    plot(timevector, mean_accepted_dilation_event_pupil_epochs,'m','LineWidth',2)
+    plot(timevector, mean_accepted_constriction_event_pupil_epochs,'c','LineWidth',2)
     plot(timevector, mean_accepted_random_event_pupil_epochs,'g','LineWidth',2)
     
     % Save figure
@@ -1179,8 +1178,8 @@ for human = 1:length(subject_list)
     % Plot blink timecourses
     plot(timevector, mean_accepted_peak_event_blink_epochs,'r','LineWidth',2)
     plot(timevector, mean_accepted_trough_event_blink_epochs,'b','LineWidth',2)
-    plot(timevector, mean_accepted_rising_event_blink_epochs,'m','LineWidth',2)
-    plot(timevector, mean_accepted_falling_event_blink_epochs,'c','LineWidth',2)
+    plot(timevector, mean_accepted_dilation_event_blink_epochs,'m','LineWidth',2)
+    plot(timevector, mean_accepted_constriction_event_blink_epochs,'c','LineWidth',2)
     plot(timevector, mean_accepted_random_event_blink_epochs,'g','LineWidth',2)
     
     % Save figure
@@ -1189,5 +1188,33 @@ for human = 1:length(subject_list)
     close
 
 end
+
+ pupil_fig = figure
+    hold on
+    
+    % Setup figure labels
+    title([subID,' Mean Accepted Pupil Phase Events'])
+    ylabel('Pupil Size (pixels)')
+    xlabel('Time (ms)')
+    
+    % Axis limits
+    xlim([-half_epoch_duration_ms, half_epoch_duration_ms])
+    ylim([-2000, 1000])
+    
+    % Plot reference line
+    stim_time = plot([0 0],[-half_epoch_duration_ms, half_epoch_duration_ms],'k')
+    zero_line = plot([-half_epoch_duration_ms, half_epoch_duration_ms], [0, 0], 'k')
+    
+    % Plot pupil timecourses
+    plot(timevector, mean_accepted_peak_event_pupil_epochs,'r','LineWidth',2)
+    plot(timevector, mean_accepted_trough_event_pupil_epochs,'b','LineWidth',2) 
+    plot(timevector, mean_accepted_dilation_event_pupil_epochs,'m','LineWidth',2)
+    plot(timevector, mean_accepted_constriction_event_pupil_epochs,'c','LineWidth',2)
+    plot(timevector, mean_accepted_random_event_pupil_epochs,'g','LineWidth',2)
+    
+    % Save figure
+    savefig(pupil_fig, fullfile(output_dir,'sim_rtPupilPhase_accepted_pupil_mean_timecourse.fig'))
+
+ 
 
 toc
