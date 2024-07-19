@@ -6,6 +6,8 @@ from utils import get_data, find_string_time, pull_pupil_sample, plot_mean_timec
 from StimulusDecider import StimulusDecider
 from EventCollector import EventCollector
 
+import config
+
 # Dictionary:
 # ms = milliseconds
 # IEI = inter-event interval
@@ -23,24 +25,11 @@ recorded_eye = 1
 num_blocks = 5
 block_duration_ms = 600000 # duration of in milliseconds
 
-# Define pupillometry sampling rate
-sampling_rate = 1000 # in Hz
-ms_per_sample = 17 # EyeLink live recording rate is (60Hz or ~17 samples/s)
-downsample_value = 17 # Downsample value - to make offline recording match live-stream recording rate
-
-# *** Display Parameters ***
-# These may be necessary for calculating blinks, saccades and microsaccades
-
-# Display monitor information
-monitor_height = 1024 # in pixels
-monitor_width = 768 # in pixels
-pixel_pitch = 0.254 # number retrieved from the monitor manufacturer's website - .254mm per pixel
-
 # *** rtPupilPhase Parameters ***
 
 # Pupil sample parameters
 pupil_sample_duration_ms = 100 # in milliseconds
-samples_in_pupil_sample = np.round(pupil_sample_duration_ms/ms_per_sample)
+samples_in_pupil_sample = np.round(pupil_sample_duration_ms/config.ms_per_sample)
 
 # Random event parameters
 # Note: The number of random events specified and the block duration will
@@ -51,11 +40,11 @@ random_IEI = block_duration_ms/num_random_events # in milliseconds
 
 # Baseline window duration for setting new pupil size and derivative thresholds
 baseline_window_ms = 5000; # in milliseconds
-samples_in_baseline_window = np.round(baseline_window_ms/ms_per_sample)
+samples_in_baseline_window = np.round(baseline_window_ms/config.ms_per_sample)
 
 # Inter-event interval for pupil phase events
 IEI_jitter_ms = 3000 # in milliseconds
-samples_in_IEI = np.round(IEI_jitter_ms/ms_per_sample) # in samples
+samples_in_IEI = np.round(IEI_jitter_ms/config.ms_per_sample) # in samples
 
 # Maximum length of search window
 max_search_window_length_ms = 5000 # in milliseconds
@@ -70,8 +59,8 @@ no_blinks_saccades = 500 # in milliseconds
 
 # define paths 
 root_path = os.getcwd()
-data_base = os.path.join(root_path,"simulations", "data","human")
-results_base = os.path.join(root_path, "simulations", "analysis", "subject_analysis","human")
+data_base = os.path.join(root_path,"data","human")
+results_base = os.path.join(root_path, "analysis", "subject_analysis","human")
 
 for subjID in subject_list:
 
@@ -116,7 +105,7 @@ for subjID in subject_list:
         
         # Downsampling matches th Eyelink real-time sampling in a live testing session
         # goes from 1000Hz to 60Hz 
-        downsampled_block_data = block_data[:, 0::downsample_value]
+        downsampled_block_data = block_data[:, 0::config.downsample_value]
 
         # ensures we only look at complete pupil samples 
         for pupil_sample_num in range(int(np.shape(downsampled_block_data)[1]/6)-1):
@@ -134,9 +123,8 @@ for subjID in subject_list:
                     sd.reset_baseline_window()
 
             # validate search window - not too long, no blinks
-            if not sd.validate_search_window(max_search_window_length_ms/ms_per_sample):
+            if not sd.validate_search_window(max_search_window_length_ms//config.ms_per_sample):
                 sd.reset_search_window()
-
                 continue
             
             # demean search window 
@@ -188,30 +176,30 @@ for subjID in subject_list:
 
         # pull epoch data for each event and concatentate across block 
         if block == 1:
-            accepted_constriction_epoch_data, all_constriction_epoch_data = constriction_events.pull_valid_epochs(block_data[1,:], half_epoch_duration_ms, ms_per_sample, False)
-            accepted_dilation_epoch_data, all_dilation_epoch_data = dilation_events.pull_valid_epochs(block_data[1,:], half_epoch_duration_ms, ms_per_sample, False)
-            accepted_peak_epoch_data, all_peak_epoch_data = peak_events.pull_valid_epochs(block_data[1,:], half_epoch_duration_ms, ms_per_sample, False)
-            accepted_trough_epoch_data, all_trough_epoch_data = trough_events.pull_valid_epochs(block_data[1,:], half_epoch_duration_ms, ms_per_sample, False)
-            all_random_epoch_data, _ = random_events.pull_valid_epochs(block_data[1,:], half_epoch_duration_ms, ms_per_sample, True) 
+            accepted_constriction_epoch_data, all_constriction_epoch_data = constriction_events.pull_valid_epochs(block_data[1,:], half_epoch_duration_ms, config.ms_per_sample)
+            accepted_dilation_epoch_data, all_dilation_epoch_data = dilation_events.pull_valid_epochs(block_data[1,:], half_epoch_duration_ms, config.ms_per_sample)
+            accepted_peak_epoch_data, all_peak_epoch_data = peak_events.pull_valid_epochs(block_data[1,:], half_epoch_duration_ms, config.ms_per_sample)
+            accepted_trough_epoch_data, all_trough_epoch_data = trough_events.pull_valid_epochs(block_data[1,:], half_epoch_duration_ms, config.ms_per_sample)
+            all_random_epoch_data, _ = random_events.pull_valid_epochs(block_data[1,:], half_epoch_duration_ms, config.ms_per_sample) 
 
         else: 
-            block_accepted_constriction_epoch_data, block_all_constriction_epoch_data = constriction_events.pull_valid_epochs(block_data[1,:], half_epoch_duration_ms, ms_per_sample, False)
+            block_accepted_constriction_epoch_data, block_all_constriction_epoch_data = constriction_events.pull_valid_epochs(block_data[1,:], half_epoch_duration_ms, config.ms_per_sample)
             accepted_constriction_epoch_data = np.append(accepted_constriction_epoch_data, block_accepted_constriction_epoch_data, axis=1)
             all_constriction_epoch_data = np.append(all_constriction_epoch_data, block_all_constriction_epoch_data, axis=1)
 
-            block_accepted_dilation_epoch_data, block_all_dilation_epoch_data = dilation_events.pull_valid_epochs(block_data[1,:], half_epoch_duration_ms, ms_per_sample, False)
+            block_accepted_dilation_epoch_data, block_all_dilation_epoch_data = dilation_events.pull_valid_epochs(block_data[1,:], half_epoch_duration_ms, config.ms_per_sample)
             accepted_dilation_epoch_data = np.append(accepted_dilation_epoch_data, block_accepted_dilation_epoch_data, axis=1)
             all_dilation_epoch_data = np.append(all_dilation_epoch_data, block_all_dilation_epoch_data, axis=1)
 
-            block_accepted_peak_epoch_data, block_all_peak_epoch_data = peak_events.pull_valid_epochs(block_data[1,:], half_epoch_duration_ms, ms_per_sample, False)
+            block_accepted_peak_epoch_data, block_all_peak_epoch_data = peak_events.pull_valid_epochs(block_data[1,:], half_epoch_duration_ms, config.ms_per_sample)
             accepted_peak_epoch_data = np.append(accepted_peak_epoch_data, block_accepted_peak_epoch_data, axis=1)
             all_peak_epoch_data = np.append(all_peak_epoch_data, block_all_peak_epoch_data, axis=1)
 
-            block_accepted_trough_epoch_data, block_all_trough_epoch_data = trough_events.pull_valid_epochs(block_data[1,:], half_epoch_duration_ms, ms_per_sample, False)
+            block_accepted_trough_epoch_data, block_all_trough_epoch_data = trough_events.pull_valid_epochs(block_data[1,:], half_epoch_duration_ms, config.ms_per_sample)
             accepted_trough_epoch_data = np.append(accepted_trough_epoch_data, block_accepted_trough_epoch_data, axis=1)
             all_trough_epoch_data = np.append(all_trough_epoch_data, block_all_trough_epoch_data, axis=1)
 
-            block_all_random_epoch_data, _ = random_events.pull_valid_epochs(block_data[1,:], half_epoch_duration_ms, ms_per_sample, True) 
+            block_all_random_epoch_data, _ = random_events.pull_valid_epochs(block_data[1,:], half_epoch_duration_ms, config.ms_per_sample) 
             all_random_epoch_data = np.append(all_random_epoch_data, block_all_random_epoch_data, axis=1)
 
     # save subject level data across all blocks

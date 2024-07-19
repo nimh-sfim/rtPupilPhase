@@ -19,7 +19,7 @@ class StimulusDecider():
     max_search_window_duration_ms : int
         maximum length of search window before resetting search window (in milliseconds)
     pupil_sample_duration_ms : int
-        duration of a pupil sample from the eye tracker in real time, in milliseconds 
+        duration of a single pupil sample from the eye tracker in real time, in milliseconds 
     num_random_events : int
         how many random events per block 
     random_event_time_sec : int 
@@ -63,8 +63,8 @@ class StimulusDecider():
         most recent EyeLink sample (collected in real time)
     old_sample : obj
         previous Eyelink sample (collected in real time)
-    pupil_sample_duration_time : int 
-        duration of pupil sample collected in real time 
+    pupil_sample_duration_time : list 
+        durations of pupil samples collected in real time 
     peak_count : int
         number of peaks identified in real time
     trough_count : int
