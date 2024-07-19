@@ -107,6 +107,10 @@ for subjID in subject_list:
         # goes from 1000Hz to 60Hz 
         downsampled_block_data = block_data[:, 0::config.downsample_value]
 
+        # reset StimulusDecider for new block 
+        sd.reset_baseline_window()
+        sd.reset_search_window()
+
         # ensures we only look at complete pupil samples 
         for pupil_sample_num in range(int(np.shape(downsampled_block_data)[1]/6)-1):
             # stage 1: get pupil sample 
