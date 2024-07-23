@@ -35,9 +35,11 @@ bg_color = (116,116,116) # background color of the window
 text_color = "black" # color of the text
 
 ### Filenames ### 
-# These are folders specifying where to find the data and where to put the outputs of the simulations. 
-data_fname = os.path.join("data", "human") # where to find previously collected data
+# These are folders specifying where to put outputs of scripts and where to find the data for simulations. 
+behav_logfiles_fname = "behav_logfiles"
+eyelink_fname = "eyelink"+os.path.sep
 results_fname = os.path.join("analysis", "subject_analysis","human") # where to store subject level analysis for the simulations
+data_fname = os.path.join("data", "human") # where to find previously collected data
 
 ### Task Structure 
 ## These reflect the fixation task reflected in Kroenemer et al., 2024. 

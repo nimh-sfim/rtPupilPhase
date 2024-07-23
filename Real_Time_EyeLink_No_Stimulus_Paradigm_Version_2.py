@@ -35,7 +35,7 @@ from EyeLinkFunctions import validate_edf_fname, setup_eyelink, calibrate_eyelin
 # *** MAIN FUNCTION ***
 # *********************
 
-def main(task_name, behavioral_folder, eyelink_folder, block_length, max_num_blocks, baseline_duration_ms,
+def main(task_name, block_length, max_num_blocks, baseline_duration_ms,
          max_search_window_duration_ms, num_random_events, IEI_duration_sec, 
          pupil_sample_duration_ms, peak_pupil_quantile, trough_pupil_quantile, 
          dilation_quantile, constriction_quantile):
@@ -58,14 +58,12 @@ def main(task_name, behavioral_folder, eyelink_folder, block_length, max_num_blo
     # *** MANAGE DATA FOLDERS AND FILENAMES ***
     # *****************************************
 
-    eyelink_folder = (eyelink_folder + os.path.sep)
-
     # set up directories - if they don't exist, make them, and change directory to directory where this script is located
     #CW: test here - making directories, if permissions don't work, etc 
-    set_up_directories(behavioral_folder, eyelink_folder)
+    set_up_directories(config.behav_logfiles_fname, config.eyelink_fname)
 
     # Show only critical log messages in the PsychoPy console
-    logFile = logging.LogFile(behavioral_folder + os.path.sep + sub_id + '_Session_'+str(info['Session #'])+'_'+task_name+'_'+info['date']+'.log', level=logging.EXP)
+    logFile = logging.LogFile(config.behav_logfiles_fname + os.path.sep + sub_id + '_Session_'+str(info['Session #'])+'_'+task_name+'_'+info['date']+'.log', level=logging.EXP)
 
     # log input parameters
     param_log_message = "Input Parameters: Task Name: "+task_name+", block length: "+str(block_length)+", max_num_blocks: "+str(max_num_blocks)+\
@@ -73,7 +71,6 @@ def main(task_name, behavioral_folder, eyelink_folder, block_length, max_num_blo
     ", num_random_events: "+str(num_random_events)+", IEI_duration_sec: "+str(IEI_duration_sec)+", pupil_sample_duration_ms: "+\
     str(pupil_sample_duration_ms)+", peak_pupil_quantile: "+str(peak_pupil_quantile)+", trough_pupil_quantile: "+str(trough_pupil_quantile)+\
     ", dilation_quantile: "+str(dilation_quantile)+", constriction_quantile: "+str(constriction_quantile)
-
     logging.log(level=logging.EXP,msg=param_log_message)
 
     # validate edf file name (length <= 8 & no special char)
@@ -266,8 +263,6 @@ def main(task_name, behavioral_folder, eyelink_folder, block_length, max_num_blo
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description = 'rtPupilPhase: Real-Time Pupillometry')
-    parser.add_argument("behavioral_folder",help="Directory where behavioral data should be stored")
-    parser.add_argument("eyelink_folder", help="Directory where EyeLink data should be stored")
     parser.add_argument("task_name", help="Name of task")
     parser.add_argument("--max_num_blocks", help="Number of task blocks. Default: 10 blocks", 
                         type=int, default=10)
@@ -295,7 +290,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
 
-    main(args.task_name, args.behavioral_folder, args.eyelink_folder, args.block_length, 
+    main(args.task_name, args.block_length, 
         args.max_num_blocks, args.baseline_duration_ms, args.max_search_window_duration_ms,
         args.num_random_events, args.IEI_duration_sec, args.pupil_sample_duration_ms, 
         args.peak_pupil_quantile, args.trough_pupil_quantile, args.dilation_quantile, 
