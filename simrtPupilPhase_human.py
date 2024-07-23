@@ -198,7 +198,6 @@ def main(subject_list, plot_timecourses, baseline_duration_ms, max_search_window
             pickle.dump(save_dict, pickle_file)
 
         if plot_timecourses:
-            # plot mean time courses for each subject - accepted and all events 
             plot_mean_timecourses(half_epoch_duration=half_epoch_duration_ms, title = "Accepted events - subject "+subjID, 
                             peak_epoch = accepted_peak_epoch_data, trough_epoch = accepted_trough_epoch_data, 
                             constriction_epoch = accepted_constriction_epoch_data, dilation_epoch = accepted_dilation_epoch_data, 
@@ -208,7 +207,6 @@ def main(subject_list, plot_timecourses, baseline_duration_ms, max_search_window
                             peak_epoch = all_peak_epoch_data, trough_epoch = all_trough_epoch_data, 
                             constriction_epoch = all_constriction_epoch_data, dilation_epoch = all_dilation_epoch_data, 
                             random_epoch = all_random_epoch_data, save_dir= os.path.join(results_dir, "all_trace.png"))
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description= 'Simulated rtPupilPhase: simulating real-time pupillometry')
