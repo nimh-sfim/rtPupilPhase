@@ -15,52 +15,44 @@ import config
 # *** Subject and Recording Parameters ***
 
 # Subject list
-subject_list = ['046','048','073','074','078','079','080','081']
-# The recorded eye (0 = left; 1 = right)
-# Note: EyeLink stores the pupil size data in a 2 x time/sample matrix. The
-# first row = the left eye and the second row = the right eye.
-recorded_eye = 1
-
-# Number of task blocks completed per participant
-num_blocks = 5
-block_duration_ms = 600000 # duration of in milliseconds
+subject_list = ['046','048','073','074','078','079','080','081'] # command line 
 
 # *** rtPupilPhase Parameters ***
 
 # Pupil sample parameters
-pupil_sample_duration_ms = 100 # in milliseconds
+pupil_sample_duration_ms = 100 # in milliseconds # command line 
 samples_in_pupil_sample = np.round(pupil_sample_duration_ms/config.ms_per_sample)
 
 # Random event parameters
 # Note: The number of random events specified and the block duration will
 # determine the random IEI. Also, note that the number of random events
 # selected will have implications on the number of pupil phase events.
-num_random_events = 15
-random_IEI = block_duration_ms/num_random_events # in milliseconds
+num_random_events = 15 # command line 
+random_IEI = config.block_duration_ms/num_random_events # in milliseconds
 
 # Baseline window duration for setting new pupil size and derivative thresholds
-baseline_window_ms = 5000; # in milliseconds
-samples_in_baseline_window = np.round(baseline_window_ms/config.ms_per_sample)
+baseline_window_ms = 5000; # in milliseconds # command line 
+samples_in_baseline_window = np.round(baseline_window_ms/config.ms_per_sample) 
 
 # Inter-event interval for pupil phase events
-IEI_jitter_ms = 3000 # in milliseconds
+IEI_jitter_ms = 3000 # in milliseconds # command line 
 samples_in_IEI = np.round(IEI_jitter_ms/config.ms_per_sample) # in samples
 
 # Maximum length of search window
-max_search_window_length_ms = 5000 # in milliseconds
+max_search_window_length_ms = 5000 # in milliseconds # command line 
 
 # *** Other Parameters ***
 
 # 50# of the epoch length to be extracted - use 50% so that can plot both before and after event
-half_epoch_duration_ms = 2500 # in milliseconds
+half_epoch_duration_ms = 2500 # in milliseconds # command line 
 
 # No blinks or saccades interval
-no_blinks_saccades = 500 # in milliseconds
+no_blinks_saccades = 500 # in milliseconds # command line 
 
 # define paths 
 root_path = os.getcwd()
-data_base = os.path.join(root_path,"data","human")
-results_base = os.path.join(root_path, "analysis", "subject_analysis","human")
+data_base = os.path.join(root_path,config.data_fname)
+results_base = os.path.join(root_path,config.results_fname)
 
 for subjID in subject_list:
 
@@ -83,7 +75,7 @@ for subjID in subject_list:
 
     # identify events across block - this matters because we care about the ends of blocks. 
     # event epochs are concatenated across blocks at end of loop 
-    for block in range(1,num_blocks+1): 
+    for block in range(1,config.num_blocks+1): 
         print("Starting block "+str(block))
 
         # initialize Event Collectors 

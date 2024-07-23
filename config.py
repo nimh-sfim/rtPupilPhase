@@ -1,3 +1,5 @@
+import os
+
 ## Real-time parameters
 
 resolution = [1920, 1080]
@@ -16,10 +18,19 @@ dilation_threshold = -50.
 
 ## Simulation Parameters 
 
-recorded_eye = 1  
-num_blocks = 5
+### Eyelink Information
+recorded_eye = 1  # Note: EyeLink stores the pupil size data in a 2 x time/sample matrix. The first row = the left eye and the second row = the right eye.
 downsample_value = 17 # Downsample value - to make offline recording match live-stream recording rate
 live_sampling_rate = 1000 # pupillometry offline sampling rate in Hz
+
+### Filenames 
+data_fname = os.path.join("data", "human")
+results_fname = os.path.join("analysis", "subject_analysis","human")
+
+### Task Structure 
+
+num_blocks = 5
+block_duration_ms = 600000 # duration of in milliseconds
 
 # *** Display Parameters ***
 # These may be necessary for calculating blinks, saccades and microsaccades
