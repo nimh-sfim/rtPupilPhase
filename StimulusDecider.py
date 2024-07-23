@@ -10,8 +10,6 @@ class StimulusDecider():
     
     Attributes
     --------
-    task_name : string
-        name of task to be used with decider 
     online : boolean 
         whether object is used in real time data collection or in simulations
     baseline_duration_ms : int 
@@ -133,7 +131,7 @@ class StimulusDecider():
     """
     
     def __init__(
-        self,task_name, block_duration_sec=600, 
+        self,block_duration_sec=600, 
         baseline_duration_ms=5000, max_search_window_duration_ms=5000,
         pupil_sample_duration_ms=100, num_random_event=20,
         IEI_duration_sec=3, peak_pupil_quantile=0.75, trough_pupil_quantile=0.25, 
@@ -144,8 +142,6 @@ class StimulusDecider():
 
         Parameters
         ----------
-        task_name: str
-            name of task to be used with decider 
         block_duration_sec : int 
             number of seconds in a block 
         baseline_duration_ms : int
@@ -204,7 +200,6 @@ class StimulusDecider():
         self._constriction_quantile = constriction_quantile
         self._idx_event = 0
         self._online = online
-        self._task_name = task_name
         self._win = win
 
         if self._online: 

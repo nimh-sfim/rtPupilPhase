@@ -32,7 +32,7 @@ from EyeLinkFunctions import validate_edf_fname, setup_eyelink, calibrate_eyelin
 # *** MAIN FUNCTION ***
 # *********************
 
-def main(task_name, block_length, max_num_blocks, baseline_duration_ms,
+def main(block_length, max_num_blocks, baseline_duration_ms,
          max_search_window_duration_ms, num_random_events, IEI_duration_sec, 
          pupil_sample_duration_ms, peak_pupil_quantile, trough_pupil_quantile, 
          dilation_quantile, constriction_quantile):
@@ -60,10 +60,10 @@ def main(task_name, block_length, max_num_blocks, baseline_duration_ms,
     set_up_directories(config.behav_logfiles_fname, config.eyelink_fname)
 
     # Show only critical log messages in the PsychoPy console
-    logFile = logging.LogFile(config.behav_logfiles_fname + os.path.sep + sub_id + '_Session_'+str(info['Session #'])+'_'+task_name+'_'+info['date']+'.log', level=logging.EXP)
+    logFile = logging.LogFile(config.behav_logfiles_fname + os.path.sep + sub_id + '_Session_'+str(info['Session #'])+'_'+info['date']+'.log', level=logging.EXP)
 
     # log input parameters
-    param_log_message = "Input Parameters: Task Name: "+task_name+", block length: "+str(block_length)+", max_num_blocks: "+str(max_num_blocks)+\
+    param_log_message = "Input Parameters: block length: "+str(block_length)+", max_num_blocks: "+str(max_num_blocks)+\
     ", baseline_duration_ms: "+str(baseline_duration_ms)+", max_search_window_duration_ms: "+str(max_search_window_duration_ms)+\
     ", num_random_events: "+str(num_random_events)+", IEI_duration_sec: "+str(IEI_duration_sec)+", pupil_sample_duration_ms: "+\
     str(pupil_sample_duration_ms)+", peak_pupil_quantile: "+str(peak_pupil_quantile)+", trough_pupil_quantile: "+str(trough_pupil_quantile)+\
@@ -121,7 +121,7 @@ def main(task_name, block_length, max_num_blocks, baseline_duration_ms,
     rng = np.random.default_rng()
     
     # Setup classes
-    sd = StimulusDecider(task_name, block_length, baseline_duration_ms, 
+    sd = StimulusDecider(block_length, baseline_duration_ms, 
                         max_search_window_duration_ms, pupil_sample_duration_ms, 
                         num_random_events, IEI_duration_sec, peak_pupil_quantile,
                         trough_pupil_quantile, dilation_quantile, constriction_quantile,
@@ -155,7 +155,7 @@ def main(task_name, block_length, max_num_blocks, baseline_duration_ms,
     while block_counter <= max_num_blocks:
         
         # Count blocks
-        block_instruction = 'Starting '+ task_name + ' Block #' + str(block_counter) + "\n\nAre you ready?"
+        block_instruction = 'Starting Block #' + str(block_counter) + "\n\nAre you ready?"
 
         # Display instructions
         instructions_screens(win, block_instruction)
@@ -167,8 +167,8 @@ def main(task_name, block_length, max_num_blocks, baseline_duration_ms,
         decision_arr = []
         
         # Log
-        logging.log(level=logging.EXP,msg='Starting ' + task_name + ' Block ' + str(block_counter))
-        el_tracker.sendMessage('Starting ' + task_name + ' Block ' + str(block_counter))
+        logging.log(level=logging.EXP,msg='Starting Block ' + str(block_counter))
+        el_tracker.sendMessage('Starting Block ' + str(block_counter))
         
         # Reset halfway logical 
         halfway_screen = False
@@ -236,15 +236,15 @@ def main(task_name, block_length, max_num_blocks, baseline_duration_ms,
         # Log
         logging.log(level=logging.EXP,msg='All pupil_sample Duration Times: ' + str(sd.get_pupil_sample_duration_time()))
         logging.log(level=logging.EXP,msg='All Search Window Detected Pupil Phase Events: ' + str(decision_arr))
-        logging.log(level=logging.EXP,msg='Finished ' + task_name + ' Block ' + str(block_counter))
-        el_tracker.sendMessage('Finished ' + task_name + ' Block ' + str(block_counter))
+        logging.log(level=logging.EXP,msg='Finished Block ' + str(block_counter))
+        el_tracker.sendMessage('Finished Block ' + str(block_counter))
         
         # Turn off fixation point
         fixation.setAutoDraw(False)
         win.update()
         
         # Show instruction screen
-        instructions_screens(win, 'Finished ' + task_name + ' Block #' + str(block_counter))
+        instructions_screens(win, 'Finished Block #' + str(block_counter))
             
         # Add to block counter
         block_counter = block_counter + 1
@@ -260,7 +260,6 @@ def main(task_name, block_length, max_num_blocks, baseline_duration_ms,
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description = 'rtPupilPhase: Real-Time Pupillometry')
-    parser.add_argument("task_name", help="Name of task")
     parser.add_argument("--max_num_blocks", help="Number of task blocks. Default: 10 blocks", 
                         type=int, default=10)
     parser.add_argument("--block_length", help="Duration of a single block, in seconds. Default: 600s", 
@@ -286,8 +285,7 @@ if __name__ == "__main__":
     
     args = parser.parse_args()
 
-
-    main(args.task_name, args.block_length, 
+    main(args.block_length, 
         args.max_num_blocks, args.baseline_duration_ms, args.max_search_window_duration_ms,
         args.num_random_events, args.IEI_duration_sec, args.pupil_sample_duration_ms, 
         args.peak_pupil_quantile, args.trough_pupil_quantile, args.dilation_quantile, 
