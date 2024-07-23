@@ -8,8 +8,9 @@ from utils import get_data, find_string_time, pull_pupil_sample, plot_mean_timec
 from StimulusDecider import StimulusDecider
 from EventCollector import EventCollector
 
-def main(subject_list, pupil_sample_duration_ms, num_random_events, IEI_duration_ms, baseline_duration_ms,
-         max_search_window_duration_ms, half_epoch_duration_ms, plot_timecourses):
+def main(subject_list, plot_timecourses, baseline_duration_ms, max_search_window_duration_ms,
+          num_random_events, IEI_duration_ms, pupil_sample_duration_ms, peak_pupil_quantile, 
+          trough_pupil_quantile, dilation_quantile, constriction_quantile, half_epoch_duration_ms):
     
     assert len(subject_list) > 0, "Please provide at least one subject"
     
@@ -44,8 +45,10 @@ def main(subject_list, pupil_sample_duration_ms, num_random_events, IEI_duration
             os.makedirs(results_dir) 
 
         # create stimulus decider object 
-        sd = StimulusDecider("fixation")
-        # add command threshold percentiles to init 
+        sd = StimulusDecider("fixation", config.block_duration_ms/1000, baseline_duration_ms, 
+                             max_search_window_duration_ms, pupil_sample_duration_ms, num_random_events,
+                             IEI_duration_ms/1000, peak_pupil_quantile, trough_pupil_quantile, 
+                             dilation_quantile, constriction_quantile)
 
         # identify events across block - this matters because we care about the ends of blocks. 
         # event epochs are concatenated across blocks at end of loop 
@@ -70,7 +73,6 @@ def main(subject_list, pupil_sample_duration_ms, num_random_events, IEI_duration
             block_data = gaze_data[:,np.where(gaze_data[0]==start_time)[0][0]:np.where(gaze_data[0]==end_time)[0][0]]
             
             # Downsampling matches th Eyelink real-time sampling in a live testing session
-            # goes from 1000Hz to 60Hz 
             downsampled_block_data = block_data[:, 0::config.ms_per_sample]
 
             # reset StimulusDecider for new block 
@@ -154,20 +156,28 @@ def main(subject_list, pupil_sample_duration_ms, num_random_events, IEI_duration
 
             else: 
                 block_accepted_constriction_epoch_data, block_all_constriction_epoch_data = constriction_events.pull_valid_epochs(block_data[1,:], half_epoch_duration_ms, config.ms_per_sample)
-                accepted_constriction_epoch_data = np.append(accepted_constriction_epoch_data, block_accepted_constriction_epoch_data, axis=1)
-                all_constriction_epoch_data = np.append(all_constriction_epoch_data, block_all_constriction_epoch_data, axis=1)
+                if block_accepted_constriction_epoch_data is not None:
+                    accepted_constriction_epoch_data = np.append(accepted_constriction_epoch_data, block_accepted_constriction_epoch_data, axis=1)
+                if block_all_constriction_epoch_data is not None:
+                    all_constriction_epoch_data = np.append(all_constriction_epoch_data, block_all_constriction_epoch_data, axis=1)
 
                 block_accepted_dilation_epoch_data, block_all_dilation_epoch_data = dilation_events.pull_valid_epochs(block_data[1,:], half_epoch_duration_ms, config.ms_per_sample)
-                accepted_dilation_epoch_data = np.append(accepted_dilation_epoch_data, block_accepted_dilation_epoch_data, axis=1)
-                all_dilation_epoch_data = np.append(all_dilation_epoch_data, block_all_dilation_epoch_data, axis=1)
+                if block_accepted_dilation_epoch_data is not None: 
+                    accepted_dilation_epoch_data = np.append(accepted_dilation_epoch_data, block_accepted_dilation_epoch_data, axis=1)
+                if block_all_dilation_epoch_data is not None:
+                    all_dilation_epoch_data = np.append(all_dilation_epoch_data, block_all_dilation_epoch_data, axis=1)
 
                 block_accepted_peak_epoch_data, block_all_peak_epoch_data = peak_events.pull_valid_epochs(block_data[1,:], half_epoch_duration_ms, config.ms_per_sample)
-                accepted_peak_epoch_data = np.append(accepted_peak_epoch_data, block_accepted_peak_epoch_data, axis=1)
-                all_peak_epoch_data = np.append(all_peak_epoch_data, block_all_peak_epoch_data, axis=1)
+                if block_accepted_peak_epoch_data is not None:
+                    accepted_peak_epoch_data = np.append(accepted_peak_epoch_data, block_accepted_peak_epoch_data, axis=1)
+                if block_all_peak_epoch_data is not None:
+                    all_peak_epoch_data = np.append(all_peak_epoch_data, block_all_peak_epoch_data, axis=1)
 
                 block_accepted_trough_epoch_data, block_all_trough_epoch_data = trough_events.pull_valid_epochs(block_data[1,:], half_epoch_duration_ms, config.ms_per_sample)
-                accepted_trough_epoch_data = np.append(accepted_trough_epoch_data, block_accepted_trough_epoch_data, axis=1)
-                all_trough_epoch_data = np.append(all_trough_epoch_data, block_all_trough_epoch_data, axis=1)
+                if block_accepted_trough_epoch_data is not None:
+                    accepted_trough_epoch_data = np.append(accepted_trough_epoch_data, block_accepted_trough_epoch_data, axis=1)
+                if block_all_trough_epoch_data is not None:
+                    all_trough_epoch_data = np.append(all_trough_epoch_data, block_all_trough_epoch_data, axis=1)
 
                 block_all_random_epoch_data, _ = random_events.pull_valid_epochs(block_data[1,:], half_epoch_duration_ms, config.ms_per_sample) 
                 all_random_epoch_data = np.append(all_random_epoch_data, block_all_random_epoch_data, axis=1)
@@ -200,30 +210,37 @@ def main(subject_list, pupil_sample_duration_ms, num_random_events, IEI_duration
                             random_epoch = all_random_epoch_data, save_dir= os.path.join(results_dir, "all_trace.png"))
 
 
-#subject_list = ['046','048','073','074','078','079','080','081'] # command line 
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description= 'Simulated rtPupilPhase: simulating real-time pupillometry')
-    parser.add_argument("subs", help="Subjects to simulate", 
-                        nargs='+', default=[]) 
+    parser.add_argument("subs", help="Subjects to simulate. Default is all subjects included in Kroenemer et al., 2024", 
+                        nargs='+', default=['046','048','073','074','078','079','080','081']) 
     parser.add_argument("--plot_timecourses", help="Whether or not to display mean timecourses.", 
                         action="store_true")
-    parser.add_argument("--pupil_sample_duration_ms", help="Duration of pupil sample. Default: 100ms",
-                        type = int, default=100)
-    parser.add_argument("--num_random_events", help="Number of random events to occur per block. Note that this value will have implications on the number of pupil phase events. Default: 15",
-                        type=int, default=15)
     parser.add_argument("--baseline_duration_ms", help="Duration of baseline window in milliseconds. Default: 5000ms",
                         type=int, default=5000)
-    parser.add_argument("--max_search_window_duration_ms", help="Maximum duration of search window before resetting, in milliseconds. Default: 5000ms",
+    parser.add_argument("--max_search_window_duration_ms", help=
+                        "Maximum duration of search window before resetting, in milliseconds. Default: 5000ms",
                          type=int, default=5000)
+    parser.add_argument("--num_random_events", help="Number of random events to occur per block. Note that this value will have implications on the number of pupil phase events. Default: 20",
+                        type=int, default=20)
     parser.add_argument("--IEI_duration_ms", help="Inter-event interval - how long to wait between valid events in milliseconds. Default: 3000ms", 
                         type=int, default=3000)
+    parser.add_argument("--pupil_sample_duration_ms", help="Duration of pupil sample. Default: 100ms",
+                        type = int, default=100)
+    parser.add_argument("--peak_pupil_quantile", help="Quantile value a peak must be bigger than to accept. Default: 0.75",
+                        type=float, default=0.75)
+    parser.add_argument("--trough_pupil_quantile", help="Quantile value a trough must be smaller than to accept. Default: 0.25",
+                        type=float, default=0.25)
+    parser.add_argument("--dilation_quantile", help="Quantile value a dilation must be bigger than to accept. Default: 0.99",
+                        type=float, default=0.99)
+    parser.add_argument("--constriction_quantile", help="Quantile value a constriction must be smaller than to accept. Default: 0.01",
+                        type=float, default=0.01)
     parser.add_argument("--half_epoch_duration_ms", help="Half epoch duration - how far before and after event to plot. Default: 2500ms",
                         type=int, default=2500)
 
-#CW: add pupil phase percentile thresholds to command line arguments 
-
     args = parser.parse_args()
-    main(args.subs, args.pupil_sample_duration_ms, args.num_random_events, args.IEI_duration_ms, 
-         args.baseline_duration_ms, args.max_search_window_duration_ms, args.half_epoch_duration_ms, 
-         args.plot_timecourses)
+
+    main(args.subs, args.plot_timecourses, args.baseline_duration_ms, 
+        args.max_search_window_duration_ms,args.num_random_events, args.IEI_duration_ms, 
+        args.pupil_sample_duration_ms, args.peak_pupil_quantile, args.trough_pupil_quantile, 
+        args.dilation_quantile, args.constriction_quantile, args.half_epoch_duration_ms)
