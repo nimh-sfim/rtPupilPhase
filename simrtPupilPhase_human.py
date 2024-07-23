@@ -10,7 +10,7 @@ from EventCollector import EventCollector
 import config
 
 def main(subject_list, pupil_sample_duration_ms, num_random_events, IEI_duration_ms, baseline_duration_ms,
-         max_search_window_duration_ms, half_epoch_duration_ms):
+         max_search_window_duration_ms, half_epoch_duration_ms, plot_timecourses):
     
     assert len(subject_list) > 0, "Please provide at least one subject to simulate"
     
@@ -187,16 +187,17 @@ def main(subject_list, pupil_sample_duration_ms, num_random_events, IEI_duration
         with open(outfile, 'wb') as pickle_file:
             pickle.dump(save_dict, pickle_file)
 
-        # plot mean time courses for each subject - accepted and all events 
-        plot_mean_timecourses(half_epoch_duration=half_epoch_duration_ms, title = "Accepted events - subject "+subjID, 
-                        peak_epoch = accepted_peak_epoch_data, trough_epoch = accepted_trough_epoch_data, 
-                        constriction_epoch = accepted_constriction_epoch_data, dilation_epoch = accepted_dilation_epoch_data, 
-                        random_epoch = all_random_epoch_data, save_dir= os.path.join(results_dir, "accepted_trace.png"))
-        
-        plot_mean_timecourses(half_epoch_duration=half_epoch_duration_ms, title = "All events - subject "+subjID, 
-                        peak_epoch = all_peak_epoch_data, trough_epoch = all_trough_epoch_data, 
-                        constriction_epoch = all_constriction_epoch_data, dilation_epoch = all_dilation_epoch_data, 
-                        random_epoch = all_random_epoch_data, save_dir= os.path.join(results_dir, "all_trace.png"))
+        if plot_timecourses:
+            # plot mean time courses for each subject - accepted and all events 
+            plot_mean_timecourses(half_epoch_duration=half_epoch_duration_ms, title = "Accepted events - subject "+subjID, 
+                            peak_epoch = accepted_peak_epoch_data, trough_epoch = accepted_trough_epoch_data, 
+                            constriction_epoch = accepted_constriction_epoch_data, dilation_epoch = accepted_dilation_epoch_data, 
+                            random_epoch = all_random_epoch_data, save_dir= os.path.join(results_dir, "accepted_trace.png"))
+            
+            plot_mean_timecourses(half_epoch_duration=half_epoch_duration_ms, title = "All events - subject "+subjID, 
+                            peak_epoch = all_peak_epoch_data, trough_epoch = all_trough_epoch_data, 
+                            constriction_epoch = all_constriction_epoch_data, dilation_epoch = all_dilation_epoch_data, 
+                            random_epoch = all_random_epoch_data, save_dir= os.path.join(results_dir, "all_trace.png"))
 
 
 #subject_list = ['046','048','073','074','078','079','080','081'] # command line 
@@ -205,6 +206,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description= 'Simulated rtPupilPhase: simulating real-time pupillometry')
     parser.add_argument("subs", help="Subjects to simulate", 
                         nargs='+', default=[]) 
+    parser.add_argument("--plot_timecourses", help="Whether or not to display mean timecourses.", 
+                        action="store_true")
     parser.add_argument("--pupil_sample_duration_ms", help="Duration of pupil sample. Default: 100ms",
                         type = int, default=100)
     parser.add_argument("--num_random_events", help="Number of random events to occur per block. Note that this value will have implications on the number of pupil phase events. Default: 15",
@@ -220,4 +223,5 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     main(args.subs, args.pupil_sample_duration_ms, args.num_random_events, args.IEI_duration_ms, 
-         args.baseline_duration_ms, args.max_search_window_duration_ms, args.half_epoch_duration_ms)
+         args.baseline_duration_ms, args.max_search_window_duration_ms, args.half_epoch_duration_ms, 
+         args.plot_timecourses)
