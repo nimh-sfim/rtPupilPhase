@@ -208,7 +208,7 @@ if __name__ == "__main__":
     parser.add_argument("--pupil_sample_duration_ms", help="Duration of pupil sample. Default: 100ms",
                         type = int, default=100)
     parser.add_argument("--num_random_events", help="Number of random events to occur per block. Note that this value will have implications on the number of pupil phase events. Default: 15",
-                        type="int", default=15)
+                        type=int, default=15)
     parser.add_argument("--baseline_duration_ms", help="Duration of baseline window in milliseconds. Default: 5000ms",
                         type=int, default=5000)
     parser.add_argument("--max_search_window_duration_ms", help="Maximum duration of search window before resetting, in milliseconds. Default: 5000ms",
@@ -219,5 +219,5 @@ if __name__ == "__main__":
                         type=int, default=2500)
 
     args = parser.parse_args()
-    main(args.subject_list, args.pupil_sample_duration_ms, args.num_random_events, args.IEI_duration_ms, 
+    main(args.subs, args.pupil_sample_duration_ms, args.num_random_events, args.IEI_duration_ms, 
          args.baseline_duration_ms, args.max_search_window_duration_ms, args.half_epoch_duration_ms)
