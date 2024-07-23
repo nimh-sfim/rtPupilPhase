@@ -5,11 +5,8 @@
 # This script can be run in PsychoPy to present a fixation task embedded with 
 # the rtPupilPhase real time monitoring of pupil size fluctuations method.
 
-# Written by: Sharif I. Kronemer and Tori Gobo
-# Last Modified: 1/2/2024
-
-# Version #
-task_version = 'v2'
+# Written by: Sharif I. Kronemer, Tori Gobo and Catherine Walsh
+# Last Modified: 7/23/2024
 
 # ************************
 # *** IMPORT LIBRARIES ***
