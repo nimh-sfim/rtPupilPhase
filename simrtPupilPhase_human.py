@@ -2,17 +2,16 @@ import numpy as np
 import os 
 import pickle
 import argparse
+import config
 
 from utils import get_data, find_string_time, pull_pupil_sample, plot_mean_timecourses
 from StimulusDecider import StimulusDecider
 from EventCollector import EventCollector
 
-import config
-
 def main(subject_list, pupil_sample_duration_ms, num_random_events, IEI_duration_ms, baseline_duration_ms,
          max_search_window_duration_ms, half_epoch_duration_ms, plot_timecourses):
     
-    assert len(subject_list) > 0, "Please provide at least one subject to simulate"
+    assert len(subject_list) > 0, "Please provide at least one subject"
     
     # number of eyelink samples in pupil sample
     samples_in_pupil_sample = np.round(pupil_sample_duration_ms/config.ms_per_sample) 
@@ -46,6 +45,7 @@ def main(subject_list, pupil_sample_duration_ms, num_random_events, IEI_duration
 
         # create stimulus decider object 
         sd = StimulusDecider("fixation")
+        # add command threshold percentiles to init 
 
         # identify events across block - this matters because we care about the ends of blocks. 
         # event epochs are concatenated across blocks at end of loop 
@@ -71,7 +71,7 @@ def main(subject_list, pupil_sample_duration_ms, num_random_events, IEI_duration
             
             # Downsampling matches th Eyelink real-time sampling in a live testing session
             # goes from 1000Hz to 60Hz 
-            downsampled_block_data = block_data[:, 0::config.downsample_value]
+            downsampled_block_data = block_data[:, 0::config.ms_per_sample]
 
             # reset StimulusDecider for new block 
             sd.reset_baseline_window()
@@ -220,6 +220,8 @@ if __name__ == "__main__":
                         type=int, default=3000)
     parser.add_argument("--half_epoch_duration_ms", help="Half epoch duration - how far before and after event to plot. Default: 2500ms",
                         type=int, default=2500)
+
+#CW: add pupil phase percentile thresholds to command line arguments 
 
     args = parser.parse_args()
     main(args.subs, args.pupil_sample_duration_ms, args.num_random_events, args.IEI_duration_ms, 

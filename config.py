@@ -12,10 +12,9 @@ dilation_threshold = -50.
 
 ### Eyelink Information
 recorded_eye = 1  # Note: EyeLink stores the pupil size data in a 2 x time/sample matrix. The first row = the left eye and the second row = the right eye.
-ms_per_sample = 17 # assumes online sampling rate of 60Hz
-downsample_value = 17 # Downsample value - to make offline recording match live-stream recording rate 
-# CW: is ms_per_sample always the same as downsample rate? 
-live_sampling_rate = 1000 # pupillometry offline sampling rate in Hz
+offline_sampling_rate = 1000 # pupillometry offline sampling rate in Hz
+live_sampling_rate = 60 # pupillometry offline sampling rate in Hz 
+ms_per_sample = 17 # Used to convert between offline and real-time recording rate, where ms_per_sample = online sample rate (Hz)/offline sample rate (Hz).
 
 ### Display monitor information ###  
 # This is information about the monitor that the task is run on.
