@@ -650,7 +650,7 @@ class StimulusDecider():
         detected pupil phase events trigger a task event. In this case, you might have another 
         PsychoPy function that does some sort of event that is called here. 
 
-        Once an event is accepted, resets global pupil_phase_IEI_time, changes internal 
+        Once an event is accepted, resets internal pupil_phase_IEI_time, changes 
         accepted_pupil_event_bool to True and sends a logging event to PsychoPy logs. 
 
         """
@@ -780,12 +780,9 @@ class StimulusDecider():
         
             # Get the latest EyeLink sample        
             self._new_sample = el_tracker.getNewestSample()
-            if self._new_sample is not None:
-                  if self._old_sample is not None:
-
             # Check there is a new pupil value and that it is not the first pupil sample 
-           # if self._new_sample is not None and self._old_sample is not None:
-                    
+            if self._new_sample is not None:
+                  if self._old_sample is not None:                    
                     # Check the new and old pupil values are not the same
                     if self._new_sample.getTime() != self._old_sample.getTime():
 

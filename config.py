@@ -3,14 +3,14 @@ import os
 ### Real-time parameters
 
 ## Initial Thresholds
-# These are the initial thresholds for the beginning of the alghorithm. 
-# They reflect the values used in Kroenemer et al., 2024. 
+# These are the initial thresholds for the beginning of the algorithm. They reflect the values used in Kroenemer et al., 2024. 
 peak_threshold = 0.
 trough_threshold = 0.
 constriction_threshold = 50.
 dilation_threshold = -50.
 
 ### Eyelink Information
+eyelink_ver = 5  # 1-EyeLink I, 2-EyeLink II, 3/4-EyeLink 1000, 5-EyeLink 1000 Plus, 6-Portable DUO
 recorded_eye = 1  # Note: EyeLink stores the pupil size data in a 2 x time/sample matrix. The first row = the left eye and the second row = the right eye.
 offline_sampling_rate = 1000 # pupillometry offline sampling rate in Hz
 live_sampling_rate = 60 # pupillometry offline sampling rate in Hz 
@@ -38,7 +38,7 @@ text_color = "black" # color of the text
 data_fname = os.path.join("data", "human") # base path for where to save data. Will also be where to find data for simulations
 results_fname = os.path.join("analysis", "subject_analysis","human") # where to store subject level analysis for the simulations
 
-### Task Structure 
+### Task Structure for simulation
 ## These reflect the fixation task reflected in Kroenemer et al., 2024. 
 num_blocks = 5 # number of blocks of task. 
 block_duration_ms = 600000 # duration of block in milliseconds

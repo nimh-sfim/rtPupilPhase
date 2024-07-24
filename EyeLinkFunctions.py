@@ -2,14 +2,13 @@ import pylink
 import os
 from EyeLinkCoreGraphicsPsychoPy import EyeLinkCoreGraphicsPsychoPy
 from string import ascii_letters, digits
-from psychopy import visual, gui, data, core, event, logging
+from psychopy import core
 import sys
 import platform
-import numpy as np
 import time
+import config
 
 from PsychoPy_funcs import instructions_screens, terminate_task
-from config import use_retina
 
 def validate_edf_fname(edf_fname):
     # Note: The script below is provided by SR Research, Inc.
@@ -77,7 +76,7 @@ def setup_eyelink(win, dummy_mode, edf_fname):
         eyelink_ver = 0  # set version to 0, in case running in Dummy mode
         
     else:
-        eyelink_ver = 5
+        eyelink_ver = config.eyelink_ver
         
     if not dummy_mode:
         vstr = el_tracker.getTrackerVersionString()
@@ -133,7 +132,7 @@ def setup_eyelink(win, dummy_mode, edf_fname):
 
     # Resolution fix for Mac retina displays
     if 'Darwin' in platform.system():
-        if use_retina:
+        if config.use_retina:
             scn_width = int(scn_width/2.0)
             scn_height = int(scn_height/2.0)
             
@@ -194,7 +193,7 @@ def setup_eyelink(win, dummy_mode, edf_fname):
     genv.setCalibrationSounds('off', 'off', 'off')
 
     # Resolution fix for macOS retina display issues
-    if use_retina:
+    if config.use_retina:
         genv.fixMacRetinaDisplay()
 
     #if not dummy_mode:
