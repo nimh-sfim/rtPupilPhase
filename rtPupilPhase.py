@@ -24,7 +24,7 @@ import config
 # EyeLink Functions
 from EyeLinkCoreGraphicsPsychoPy import EyeLinkCoreGraphicsPsychoPy
 
-from PsychoPy_funcs import set_up_directories, instructions_screens, general_instruction_screens, block_trigger, end_experiment
+from PsychoPyFunctions import set_up_directories, instructions_screens, general_instruction_screens, block_trigger, end_experiment
 from StimulusDecider import StimulusDecider
 from EyeLinkFunctions import validate_edf_fname, setup_eyelink, calibrate_eyelink
 

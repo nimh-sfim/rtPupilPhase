@@ -6,9 +6,17 @@ import config
 
 import numpy as np
 
-def set_up_directories( behavioral_folder, eyelink_folder): 
-    eyelinkFolder = (eyelink_folder + os.path.sep)
+def set_up_directories( behavioral_folder, eyelink_folder):
+    """
+    Set up directories to save real-time data. If directories do not exist, make them.
 
+    Parameters
+    ----------
+    behavioral_folder : str
+        directory where to save behavioral log files 
+    eyelink_folder : str 
+        directory where to save EyeLink EDF files
+    """    
     # Check for the behavioral data directory, otherwise make it
     if not os.path.isdir(behavioral_folder):
             os.makedirs(behavioral_folder)  # If this fails (e.g. permissions) we will get error
@@ -27,7 +35,15 @@ def clear_screen(win):
     win.flip()
 
 def terminate_task(win):
-    """ Terminate the task gracefully and retrieve the EDF data file """
+    """ 
+    Terminate the task gracefully and retrieve the EDF data file
+
+    Parameters
+    ----------
+    win : PsychoPy Screen
+        Screen where experiment takes place
+
+    """
     
     el_tracker = pylink.getEYELINK()
     
@@ -50,7 +66,14 @@ def terminate_task(win):
     sys.exit()
     
 def abort_trial(win):   
-    """Ends recording abruptly"""
+    """
+    Ends recording abruptly
+    
+    Parameters
+    ----------
+    win : PsychoPy Screen
+        Screen where experiment takes place
+    """
     
     el_tracker = pylink.getEYELINK()
     
@@ -67,7 +90,14 @@ def abort_trial(win):
     return pylink.TRIAL_ERROR
 
 def end_experiment(win) -> None:
-    """End experiment"""
+    """
+    End experiment
+    
+    Parameters
+    ----------
+    win : PsychoPy Screen
+        Screen where experiment takes place
+    """
     el_tracker = pylink.getEYELINK()
 
     # Log
@@ -84,7 +114,14 @@ def end_experiment(win) -> None:
     win.close()
    
 def quit_task(win) -> None:
-    """Quit task based off of key presses"""
+    """
+    Quit task based off of key presses
+    
+    Parameters
+    ----------
+    win : PsychoPy Screen
+        Screen where experiment takes place
+    """
     
     # Record key presses
     allKeys = event.getKeys(['p','escape'])
@@ -100,7 +137,14 @@ def quit_task(win) -> None:
                 end_experiment(win)
 
 def block_trigger(win):
-    """Display block trigger screen"""
+    """
+    Display block trigger screen
+    
+    Parameters
+    ----------
+    win : PsychoPy Screen
+        Screen where experiment takes place
+    """
     el_tracker = pylink.getEYELINK()
 
     # Log
@@ -125,7 +169,14 @@ def block_trigger(win):
     el_tracker.sendMessage('Block trigger received')
 
 def instruction_continue(win):
-    """Continue/proceed from instruction screen"""
+    """
+    Continue/proceed from instruction screen
+    
+    Parameters
+    ----------
+    win : PsychoPy Screen
+        Screen where experiment takes place
+    """
 
     # Wait for key press
     key = event.waitKeys(keyList=['space', 'escape', 'p'])
@@ -135,7 +186,16 @@ def instruction_continue(win):
         end_experiment(win)
     
 def instructions_screens(win, instruction:str): 
-    """Function presents all the instructions needed for the task"""
+    """
+    Function presents all the instructions needed for the task
+    
+    Parameters
+    ----------
+    win : PsychoPy Screen
+        Screen where experiment takes place
+    instruction : str 
+        instruction to be presented
+    """
 
     scn_width, scn_height = win.size
     # Setup text
@@ -152,7 +212,17 @@ def instructions_screens(win, instruction:str):
     instruction_continue(win)
 
 def general_instruction_screens(win, fixation):
-    """Present the task instructions"""
+    """
+    Present the task instructions
+    
+    Parameters
+    ----------
+    win : PsychoPy Screen
+        Screen where experiment takes place
+    fixation : PsychoPy TextStim object
+        fixation cross to be presented
+
+    """
     # Log
     logging.log(level=logging.EXP,msg='General task instructions')
 

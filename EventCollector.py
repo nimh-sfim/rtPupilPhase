@@ -123,7 +123,7 @@ def plot_mean_timecourses(half_epoch_duration, title = "", peak_epoch=None,
     Parameters
     ----------
     half_epoch_duration : int
-        duration (ms) of half an epoch to plot (i.e. how much time before and after evenbt)
+        duration (ms) of half an epoch to plot (i.e. how much time before and after event)
     title : str
         title of the plot
     peak_epoch : numpy.ndarray
@@ -318,7 +318,7 @@ class EventCollector():
         Returns
         ----------
         demeaned_epoch_data : np.ndarray 
-            demeaned epoch data, with dimensions (1 x half_epoch_duration*2 + 1)
+            demeaned epoch data, with dimensions (1, half_epoch_duration*2 + 1)
 
         """
         epoch_data = pupil_data[time-half_epoch_duration:time+half_epoch_duration+1] # add 1 to get equal number of events on each side (centered around event) 

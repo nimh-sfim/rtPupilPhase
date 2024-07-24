@@ -3,7 +3,7 @@ from scipy.signal import find_peaks
 from psychopy import logging, core
 import pylink
 import config
-from PsychoPy_funcs import quit_task
+from PsychoPyFunctions import quit_task
 
 class StimulusDecider():
     """Object to store data and detect pupil phase events in real time and in simulations 
@@ -17,7 +17,7 @@ class StimulusDecider():
     max_search_window_duration_ms : int
         maximum length of search window before resetting search window (in milliseconds)
     pupil_sample_duration_ms : int
-        duration of a single pupil sample from the eye tracker in real time, in milliseconds 
+        duration of a single pupil sample, in milliseconds 
     num_random_events : int
         how many random events per block 
     random_event_time_sec : int 
@@ -76,6 +76,14 @@ class StimulusDecider():
         1 = peak, -1 = trough, 2 = dilation, -2 = constriction, 0 = no event
     accepted_pupil_event_bool : boolean 
         internal variable for marking whether an event was accepted 
+    win : PsychoPy Window
+            screen to be updated in real-time 
+    pupil_phase_IEI_timer : PsychoPy core.Clock() 
+        timer to keep track of inter-event intervals in real-time
+    random_IEI_timer : PsychoPy core.Clock() 
+        timer to keep track of inter-event intervals in real-time
+    pupil_sample_IEI_timer : PsychoPy core.Clock() 
+        timer to keep track of the duration of pupil samples in real-time
 
     Methods
     --------
@@ -120,7 +128,7 @@ class StimulusDecider():
     get_baseline_window(): 
         accesses current baseline window 
     get_search_window_fit_vals(): 
-        returns the fitted search window values. 
+        accesses the fitted search window values. 
     
     Notes
     --------

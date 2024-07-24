@@ -8,9 +8,29 @@ import platform
 import time
 import config
 
-from PsychoPy_funcs import instructions_screens, terminate_task
+from PsychoPyFunctions import instructions_screens, terminate_task
 
 def validate_edf_fname(edf_fname):
+    """
+    Determine whether provided EDF filename is valid. 
+
+    Filename must contain only ASCII letters and digits and be less than 8 characters long.
+
+    Parameters
+    ----------
+    edf_fname :  str
+        filename to validate
+
+    Returns
+    ----------
+    edf_fname : str 
+        valid filename 
+    state : boolean 
+        whether filename is valid 
+    message : str
+        message to print as to why file is invalid
+        
+    """
     # Note: The script below is provided by SR Research, Inc.
     edf_fname = edf_fname.rstrip().split('.')[0]
     time_str = time.strftime("_%Y_%m_%d_%H_%M", time.localtime())
@@ -18,7 +38,7 @@ def validate_edf_fname(edf_fname):
     allowed_char = ascii_letters + digits + '_'
     if not all([c in allowed_char for c in edf_fname]):
         state=False
-        message="ERROR: *** Invalid EDF filename"
+        message="ERROR: *** Invalid characters in EDF filename"
     elif len(edf_fname) > 8: 
         state=False
         message="ERROR: *** EDF filename should not exceed 8 characters"
@@ -29,8 +49,21 @@ def validate_edf_fname(edf_fname):
     return edf_fname, state, message
 
 def setup_eyelink(win, dummy_mode, edf_fname): 
+    """
+    Set up EyeLink eye-tracker. 
 
-    # Note: The script below is provided by SR Research, Inc.
+    Parameters
+    ----------
+    win : PsychoPy screen 
+        screen experiment is run on 
+    dummy_mode : boolean 
+        whether eye-tracker is connected
+    edf_fname :  str
+        filename to save EDF data in
+       
+    """   
+
+    # Note: The script below is based on a script provided by SR Research, Inc.
      # Step 1: Connect to the EyeLink Host PC
 
     # The Host IP address, by default, is "100.1.1.1".
@@ -201,7 +234,17 @@ def setup_eyelink(win, dummy_mode, edf_fname):
     pylink.openGraphicsEx(genv)
 
 def calibrate_eyelink(win, dummy_mode): 
-    # Note: The script below is provided by SR Research, Inc.
+    """
+    Calibrate EyeLink eye-tracker. 
+
+    Parameters
+    ----------
+    win : PsychoPy screen 
+        screen experiment is run on 
+    dummy_mode : boolean 
+        whether eye-tracker is connected       
+    """   
+    # Note: The script below is based on one provided by SR Research, Inc.
     el_tracker = pylink.getEYELINK()
     if not dummy_mode: 
          # Gaze calibration

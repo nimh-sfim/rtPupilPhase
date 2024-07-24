@@ -4,9 +4,9 @@ import pickle
 import argparse
 import config
 
-from utils import get_data, find_string_time, pull_pupil_sample, plot_mean_timecourses
 from StimulusDecider import StimulusDecider
 from EventCollector import EventCollector
+from EventCollector import get_data, find_string_time, pull_pupil_sample, plot_mean_timecourses
 
 def main(subject_list, plot_timecourses, baseline_duration_ms, max_search_window_duration_ms,
           num_random_events, IEI_duration_ms, pupil_sample_duration_ms, peak_pupil_quantile, 
