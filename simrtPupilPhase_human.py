@@ -226,8 +226,7 @@ def main(subject_list, plot_timecourses, baseline_duration_ms, max_search_window
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description= 'Simulated rtPupilPhase: simulating real-time pupillometry')
-    parser.add_argument("subs", help="Subjects to simulate. Default is all subjects included in Kroenemer et al., 2024", 
-                        nargs='+', default=['046','048','073','074','078','079','080','081']) 
+    parser.add_argument("subs", help="Subjects to simulate.", nargs='+') 
     parser.add_argument("--plot_timecourses", help="Whether or not to display mean timecourses.", 
                         action="store_true")
     parser.add_argument("--baseline_duration_ms", help="Duration of baseline window in milliseconds. Default: 5000ms",
