@@ -57,10 +57,12 @@ def main(block_length, max_num_blocks, baseline_duration_ms,
 
     # set up directories - if they don't exist, make them, and change directory to directory where this script is located
     #CW: test here - making directories, if permissions don't work, etc 
-    set_up_directories(config.behav_logfiles_fname, config.eyelink_fname)
+    behav_fname = os.path.join(config.data_fname, sub_id,'Behavior')
+    eyelink_fname = os.path.join(config.data_fname, sub_id,'EyeLink')
+    set_up_directories(behav_fname, eyelink_fname)
 
     # Show only critical log messages in the PsychoPy console
-    logFile = logging.LogFile(config.behav_logfiles_fname + os.path.sep + sub_id + '_Session_'+str(info['Session #'])+'_'+info['date']+'.log', level=logging.EXP)
+    logFile = logging.LogFile(behav_fname + os.path.sep + sub_id + '_Session_'+str(info['Session #'])+'_'+info['date']+'.log', level=logging.EXP)
 
     # log input parameters
     param_log_message = "Input Parameters: block length: "+str(block_length)+", max_num_blocks: "+str(max_num_blocks)+\
@@ -270,8 +272,8 @@ if __name__ == "__main__":
                          type=int, default=5000)
     parser.add_argument("--num_random_events", help="Number of random events per block. Default: 20 events", 
                         type=int, default=20)
-    parser.add_argument("--IEI_duration_sec", help="Inter-event interval - how long to wait between valid events in seconds. Default: 3s", 
-                        type=int, default=3)
+    parser.add_argument("--IEI_duration_ms", help="Inter-event interval - how long to wait between valid events in seconds. Default: 3s", 
+                        type=int, default=3000)
     parser.add_argument("--pupil_sample_duration_ms", help="How long we should consider a pupil sample in milliseconds. Default: 100ms", 
                         type=int, default=100)
     parser.add_argument("--peak_pupil_quantile", help="Quantile value a peak must be bigger than to accept. Default: 0.75",
@@ -287,6 +289,6 @@ if __name__ == "__main__":
 
     main(args.block_length, 
         args.max_num_blocks, args.baseline_duration_ms, args.max_search_window_duration_ms,
-        args.num_random_events, args.IEI_duration_sec, args.pupil_sample_duration_ms, 
+        args.num_random_events, args.IEI_duration_ms/1000, args.pupil_sample_duration_ms, 
         args.peak_pupil_quantile, args.trough_pupil_quantile, args.dilation_quantile, 
         args.constriction_quantile)

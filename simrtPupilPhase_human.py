@@ -45,7 +45,7 @@ def main(subject_list, plot_timecourses, baseline_duration_ms, max_search_window
             os.makedirs(results_dir) 
 
         # create stimulus decider object 
-        sd = StimulusDecider("fixation", config.block_duration_ms/1000, baseline_duration_ms, 
+        sd = StimulusDecider(config.block_duration_ms/1000, baseline_duration_ms, 
                              max_search_window_duration_ms, pupil_sample_duration_ms, num_random_events,
                              IEI_duration_ms/1000, peak_pupil_quantile, trough_pupil_quantile, 
                              dilation_quantile, constriction_quantile)
@@ -158,26 +158,42 @@ def main(subject_list, plot_timecourses, baseline_duration_ms, max_search_window
                 block_accepted_constriction_epoch_data, block_all_constriction_epoch_data = constriction_events.pull_valid_epochs(block_data[1,:], half_epoch_duration_ms, config.ms_per_sample)
                 if block_accepted_constriction_epoch_data is not None:
                     accepted_constriction_epoch_data = np.append(accepted_constriction_epoch_data, block_accepted_constriction_epoch_data, axis=1)
+                else: 
+                    print("No accepted constriction events in block # "+block)
                 if block_all_constriction_epoch_data is not None:
                     all_constriction_epoch_data = np.append(all_constriction_epoch_data, block_all_constriction_epoch_data, axis=1)
+                else:    
+                    print("No constriction events in block # "+block)
 
                 block_accepted_dilation_epoch_data, block_all_dilation_epoch_data = dilation_events.pull_valid_epochs(block_data[1,:], half_epoch_duration_ms, config.ms_per_sample)
                 if block_accepted_dilation_epoch_data is not None: 
                     accepted_dilation_epoch_data = np.append(accepted_dilation_epoch_data, block_accepted_dilation_epoch_data, axis=1)
+                else: 
+                    print("No accepted dilation events in block # "+block)
                 if block_all_dilation_epoch_data is not None:
                     all_dilation_epoch_data = np.append(all_dilation_epoch_data, block_all_dilation_epoch_data, axis=1)
+                else:    
+                    print("No dilation events in block # "+block)
 
                 block_accepted_peak_epoch_data, block_all_peak_epoch_data = peak_events.pull_valid_epochs(block_data[1,:], half_epoch_duration_ms, config.ms_per_sample)
                 if block_accepted_peak_epoch_data is not None:
                     accepted_peak_epoch_data = np.append(accepted_peak_epoch_data, block_accepted_peak_epoch_data, axis=1)
+                else: 
+                    print("No accepted peak events in block # "+block)    
                 if block_all_peak_epoch_data is not None:
                     all_peak_epoch_data = np.append(all_peak_epoch_data, block_all_peak_epoch_data, axis=1)
+                else:    
+                    print("No peak events in block # "+block)
 
                 block_accepted_trough_epoch_data, block_all_trough_epoch_data = trough_events.pull_valid_epochs(block_data[1,:], half_epoch_duration_ms, config.ms_per_sample)
                 if block_accepted_trough_epoch_data is not None:
                     accepted_trough_epoch_data = np.append(accepted_trough_epoch_data, block_accepted_trough_epoch_data, axis=1)
+                else: 
+                    print("No accepted trough events in block # "+block)
                 if block_all_trough_epoch_data is not None:
                     all_trough_epoch_data = np.append(all_trough_epoch_data, block_all_trough_epoch_data, axis=1)
+                else:    
+                    print("No trough events in block # "+block)
 
                 block_all_random_epoch_data, _ = random_events.pull_valid_epochs(block_data[1,:], half_epoch_duration_ms, config.ms_per_sample) 
                 all_random_epoch_data = np.append(all_random_epoch_data, block_all_random_epoch_data, axis=1)
