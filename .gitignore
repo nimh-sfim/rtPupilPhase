@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 testing.ipynb
 utils/naninterp.m
 utils/license.txt
@@ -6,6 +7,7 @@ utils/PlotMicrosaccadeRate.m
 utils/GetVelocity.m
 behavioral/*
 analysis/*
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 .pytest_cache

@@ -10,7 +10,7 @@
 % may be required when testing alternative data sets. 
 
 % Written by: Sharif I. Kronemer
-% Last Modified: 12/27/2023
+% Last Modified: 2/20/2024
 
 clear all
 
@@ -474,14 +474,18 @@ for human = 1:length(subject_list)
             %% Stage 3 - Model search window pupil data with polynomial fit
         
             % Setup fitting sample vector
+            % Note: Slighty different results will be produced if the
+            % search window sample vector begins at 0 versus 1; Results
+            % reported in Kronemer et al., 2024 were achieved using 1 as
+            % the onset value. 
             search_window_sample_vector = 1:length(search_window_pupil);
-        
+
             % Demean search window
             demean_search_window_pupil = search_window_pupil - mean(search_window_pupil,"omitnan"); 
         
             % Fit data with a polynomial function
             search_window_fit = fit(search_window_sample_vector',double(demean_search_window_pupil'),'poly2');
-        
+
             % Find the last pupil size value of the fitted curve
             fit_value = search_window_fit(length(search_window_pupil));
     
@@ -687,7 +691,7 @@ for human = 1:length(subject_list)
     
         % Rename pupil data to affiliate with block
         eval(['Block_',num2str(block),'_pupil_data = block_pupil_data;'])
-        
+    
         %% Pupil Data Preprocessing
         
         % Pupil conversion value

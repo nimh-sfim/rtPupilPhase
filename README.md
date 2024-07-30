@@ -97,7 +97,7 @@ Similarly, the simulated rtPupilPhase can be run from the command line with the 
 python3 simrtPupilPhase_human.py 046 048
 ```
 
-There are no required parameters for the real-time pupillometry code; the simulation Python code requires a list of subject IDs to run through (see example above for syntax). Just as with the real-time code, you can specify the parameters of the real-time algorithm using command line options. To see all of the options, you can run 
+There are no required parameters for the real-time pupillometry code; the simulation Python code requires a list of subject IDs to run through (see example above for syntax). Just as with the real-time code, you can specify the parameters of the real-time algorithm using command line options. To see all of the options, you can run
 
 ```bash
 python3 simrtPupilPhase_human.py -h
