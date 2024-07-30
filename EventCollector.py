@@ -257,7 +257,15 @@ class EventCollector():
             size of pupil 
         diff_fit : int 
             last value of the search window gradient 
-            
+        
+        This function updates the following attributes: 
+        ----------------------------------------------
+        _idx : adds to the list of event indices 
+        _times : adds to the list of times of events
+        _pupil_size : adds to the list of pupil sizes
+        _diff_fit : adds to the gradient fit 
+        _count : increments tally of event
+
         """
         self._idx.append(idx-1) 
         self._times.append(time)
@@ -268,10 +276,12 @@ class EventCollector():
 
     def store_accepted_event(self): 
         """
-        Store index of an accepted event
+        Store index of an accepted event, if identified as valid. 
 
-        Method called if event is identified as valid. Pull the final value from the list of all
-        event indexes and add it to the internal tracker self._accepted_event_idx
+        This function updates the following attributes: 
+        ----------------------------------------------
+        _accepted_event_idx : stores index of current event in list of accepted event indices
+
         """
         accepted_idx = self._idx[-1]
         self._accepted_event_idx.append(accepted_idx)

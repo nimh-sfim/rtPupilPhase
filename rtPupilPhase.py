@@ -12,53 +12,41 @@
 # *** IMPORT LIBRARIES ***
 # ************************
 
-# Load Python and Psychopy Functions
-from psychopy import visual, gui, data, core, event, logging
-import numpy as np
-import time
-import pylink
 import os
+import time
 import argparse
-import config 
+import numpy as np
+from psychopy import visual, core, logging
+from psychopy.gui import DlgFromDict
+from psychopy.data import getDateStr
+from psychopy.event import getKeys
+import pylink
 
-# EyeLink Functions
-from EyeLinkCoreGraphicsPsychoPy import EyeLinkCoreGraphicsPsychoPy
-
+import rtPupil_config 
+from EyeLinkFunctions import validate_edf_fname, setup_eyelink, calibrate_eyelink
 from PsychoPyFunctions import set_up_directories, instructions_screens, general_instruction_screens, block_trigger, end_experiment
 from StimulusDecider import StimulusDecider
-from EyeLinkFunctions import validate_edf_fname, setup_eyelink, calibrate_eyelink
-
-# *********************
-# *** MAIN FUNCTION ***
-# *********************
 
 def main(block_length, max_num_blocks, baseline_duration_ms,
          max_search_window_duration_ms, num_random_events, IEI_duration_sec, 
          pupil_sample_duration_ms, peak_pupil_quantile, trough_pupil_quantile, 
          dilation_quantile, constriction_quantile):
 
-    # ***************************
-    # ******* USER INPUTS *******
-    # ***************************
+    ## User Inputs ## 
 
     # Setup the subject info screen
     info = {'Session #': 1, 'Subject ID': 'Test', 'EyeLink': ['y','n'], 'EyeLink EDF': 'test.edf', '(1) Skip task instructions':['n', 'y']}
-    dlg = gui.DlgFromDict(info, title = 'Real Time Pupillometry Fixation Experiment')
+    dlg = DlgFromDict(info, title = 'Real Time Pupillometry Fixation Experiment')
     # Find experiment date
-    info['date'] = data.getDateStr()
+    info['date'] = getDateStr()
     # Filename = Subject ID entered above
     sub_id = info['Subject ID']
     # EyeLink EDF filename
     tmp_str = info['EyeLink EDF']
 
-    # *****************************************
-    # *** MANAGE DATA FOLDERS AND FILENAMES ***
-    # *****************************************
-
     # set up directories - if they don't exist, make them, and change directory to directory where this script is located
-    #CW: test here - making directories, if permissions don't work, etc 
-    behav_fname = os.path.join(config.data_fname, sub_id,'Behavior')
-    eyelink_fname = os.path.join(config.data_fname, sub_id,'EyeLink')
+    behav_fname = os.path.join(rtPupil_config.data_fname, sub_id,'Behavior')
+    eyelink_fname = os.path.join(rtPupil_config.data_fname, sub_id,'EyeLink')
     set_up_directories(behav_fname, eyelink_fname)
 
     # Show only critical log messages in the PsychoPy console
@@ -84,27 +72,16 @@ def main(block_length, max_num_blocks, baseline_duration_ms,
     time_str = time.strftime("_%Y_%m_%d_%H_%M", time.localtime())
     session_identifier = edf_fname + time_str
 
-    # ***********************
-    # *** PSYCHOPY ITEMS ***
-    # ***********************
+    ### PsychoPy Items ### 
 
     # Basic window to use later 
-    win = visual.Window(size = config.resolution, color = [0,0,0], monitor = 'testMonitor', fullscr = True, units ='cm')
+    win = visual.Window(size = rtPupil_config.resolution, color = [0,0,0], monitor = 'testMonitor', fullscr = True, units ='cm')
     # Setup fixation cross
-    fixation = visual.TextStim(win, text="+", color = config.text_color, pos = [0, 0], autoLog = False)
-    # Create text screens to display later:
-    instructions = visual.TextStim(win, text='', color=config.text_color, pos=[0, 2])  #This is an empty instructions screen to be filled with text below
-
-    # ***********************
-    # ******* TIMERS ********
-    # ***********************
-
+    fixation = visual.TextStim(win, text="+", color = rtPupil_config.text_color, pos = [0, 0], autoLog = False)
     block_timer = core.Clock() # Block timer
     general_timer = core.Clock() # Global timer
 
-    # ************************
-    # *** INITIATE EYELINK ***
-    # ************************
+    ### Initiate Eyelink
 
     # EyeLink Dummy mode? - Set to False if testing with actual system
     if info['EyeLink'] == 'y':
@@ -117,21 +94,15 @@ def main(block_length, max_num_blocks, baseline_duration_ms,
     setup_eyelink(win, dummy_mode, edf_fname)
     calibrate_eyelink(win, dummy_mode)
     el_tracker = pylink.getEYELINK()
-
-    # Calibration task constants
-    # Set random seed
-    rng = np.random.default_rng()
     
-    # Setup classes
+    # Set up StimulusDecider object for rtPupilPhase algorithm
     sd = StimulusDecider(block_length, baseline_duration_ms, 
                         max_search_window_duration_ms, pupil_sample_duration_ms, 
                         num_random_events, IEI_duration_sec, peak_pupil_quantile,
                         trough_pupil_quantile, dilation_quantile, constriction_quantile,
-                        online=True, win=win) # sets up stimulus decider object
+                        online=True, win=win) 
     
-    # *******************************
-    # *** Beginning of Experiment ***
-    # *******************************
+    ### Beginning of PsychoPy Experiment ### 
 
     # Define instruction text
     instructions_screens(win, "Experiment is setup!\n\nLet's get started!")
@@ -142,10 +113,6 @@ def main(block_length, max_num_blocks, baseline_duration_ms,
         # Instructions screen
         general_instruction_screens(win, fixation)
     
-    # ************************
-    # *** Main Task Phases ***
-    # ************************
- 
     # Setup block counter
     block_counter = 1
     
@@ -156,16 +123,12 @@ def main(block_length, max_num_blocks, baseline_duration_ms,
     # Loop over task blocks
     while block_counter <= max_num_blocks:
         
-        # Count blocks
+        # Start block 
         block_instruction = 'Starting Block #' + str(block_counter) + "\n\nAre you ready?"
-
-        # Display instructions
         instructions_screens(win, block_instruction)
-        
-        # Block Trigger
         block_trigger(win)
         
-        # Initialize variable
+        # Initialize variable to track events 
         decision_arr = []
         
         # Log
@@ -175,21 +138,17 @@ def main(block_length, max_num_blocks, baseline_duration_ms,
         # Reset halfway logical 
         halfway_screen = False
         
-        # Reset block timer
+        # Reset block timer to start block
         block_timer.reset()
 
         # Wait block duration
         while block_timer.getTime() < block_length:
             # Display a halfway completion screen
             if halfway_screen == False and block_timer.getTime() > block_length/2:
-
-                # Reset
                 halfway_screen = True
 
-                # Setup progress screen
-                progress_screen = visual.TextStim(win, text="You completed 50% of this block!", color=config.text_color)
-
-                # Show progress screen/ turn off fixation
+                # Show progress screen 
+                progress_screen = visual.TextStim(win, text="You completed 50% of this block!", color=rtPupil_config.text_color)
                 fixation.setAutoDraw(False)
                 progress_screen.setAutoDraw(True)
 
@@ -200,7 +159,7 @@ def main(block_length, max_num_blocks, baseline_duration_ms,
                 while general_timer.getTime() < 2:
                     win.update()
 
-                # Turn on fixation
+                # Turn fixation back on
                 progress_screen.setAutoDraw(False)
                 fixation.setAutoDraw(True)
                 win.update()
@@ -212,17 +171,12 @@ def main(block_length, max_num_blocks, baseline_duration_ms,
                 while general_timer.getTime() < 2:
                     win.update()
 
-            # Get all pressed keys
-            # NOTE: allKeys will reset itself when getKeys is called
-            allKeys = event.getKeys(['p','escape'])
+            # Get all pressed keys. NOTE: allKeys will reset itself when getKeys is called
+            allKeys = getKeys(['p','escape'])
     
-            # If a key was pressed
+            # If a key was pressed, check for quit keys
             if allKeys != None:
-    
-                # Loop over key presses
                 for thisKey in allKeys:
-    
-                    # End experiment
                     if np.in1d(thisKey,['escape','p']):
                         end_experiment(win)
             
@@ -232,7 +186,6 @@ def main(block_length, max_num_blocks, baseline_duration_ms,
             if not dummy_mode:
                 # Build search window
                 sd.build_search_window()
-
                 # Look for pupil phase events
                 decision_arr.append(sd.detect_events_online())
         # Log
@@ -241,48 +194,40 @@ def main(block_length, max_num_blocks, baseline_duration_ms,
         logging.log(level=logging.EXP,msg='Finished Block ' + str(block_counter))
         el_tracker.sendMessage('Finished Block ' + str(block_counter))
         
-        # Turn off fixation point
+        # End block
         fixation.setAutoDraw(False)
         win.update()
-        
-        # Show instruction screen
         instructions_screens(win, 'Finished Block #' + str(block_counter))
-            
-        # Add to block counter
         block_counter = block_counter + 1
         
-    # *******************************
-    # ***** End of Experiment *******
-    # *******************************
-    
-    # Show instruction screen
+    ### End experiment ###
     instructions_screens(win, "Exiting task! \n\nAn experimenter will communicate with you shortly.")
     end_experiment(win)
             
 if __name__ == "__main__":
 
-    parser = argparse.ArgumentParser(description = 'rtPupilPhase: Real-Time Pupillometry')
-    parser.add_argument("--max_num_blocks", help="Number of task blocks. Default: 10 blocks", 
+    parser = argparse.ArgumentParser(description = 'rtPupilPhase: Real-Time Pupillometry', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument("--max_num_blocks", help="Number of task blocks.", 
                         type=int, default=10)
-    parser.add_argument("--block_length", help="Duration of a single block, in seconds. Default: 600s", 
+    parser.add_argument("--block_length", help="Duration of a single block, in seconds.", 
                         type=int, default=600)
-    parser.add_argument("--baseline_duration_ms", help="Duration of baseline window in milliseconds. Default: 5000ms", 
+    parser.add_argument("--baseline_duration_ms", help="Duration of baseline window in milliseconds.", 
                         type=int, default=5000)
-    parser.add_argument("--max_search_window_duration_ms", help="Maximum duration of search window before resetting, in milliseconds. Default: 5000ms",
+    parser.add_argument("--max_search_window_duration_ms", help="Maximum duration of search window before resetting, in milliseconds.",
                          type=int, default=5000)
-    parser.add_argument("--num_random_events", help="Number of random events per block. Default: 20 events", 
+    parser.add_argument("--num_random_events", help="Number of random events per block.", 
                         type=int, default=20)
-    parser.add_argument("--IEI_duration_ms", help="Inter-event interval - how long to wait between valid events in seconds. Default: 3s", 
+    parser.add_argument("--IEI_duration_ms", help="Inter-event interval - how long to wait between valid events in seconds.", 
                         type=int, default=3000)
-    parser.add_argument("--pupil_sample_duration_ms", help="How long we should consider a pupil sample in milliseconds. Default: 100ms", 
+    parser.add_argument("--pupil_sample_duration_ms", help="How long we should consider a pupil sample in milliseconds.", 
                         type=int, default=100)
-    parser.add_argument("--peak_pupil_quantile", help="Quantile value a peak must be bigger than to accept. Default: 0.75",
+    parser.add_argument("--peak_pupil_quantile", help="Quantile value a peak must be bigger than to accept.",
                         type=float, default=0.75)
-    parser.add_argument("--trough_pupil_quantile", help="Quantile value a trough must be smaller than to accept. Default: 0.25",
+    parser.add_argument("--trough_pupil_quantile", help="Quantile value a trough must be smaller than to accept.",
                         type=float, default=0.25)
-    parser.add_argument("--dilation_quantile", help="Quantile value a dilation must be bigger than to accept. Default: 0.99",
+    parser.add_argument("--dilation_quantile", help="Quantile value a dilation must be bigger than to accept.",
                         type=float, default=0.99)
-    parser.add_argument("--constriction_quantile", help="Quantile value a constriction must be smaller than to accept. Default: 0.01",
+    parser.add_argument("--constriction_quantile", help="Quantile value a constriction must be smaller than to accept.",
                         type=float, default=0.01)
     
     args = parser.parse_args()

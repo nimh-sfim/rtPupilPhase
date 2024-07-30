@@ -1,12 +1,12 @@
 import pylink
-import os
 from EyeLinkCoreGraphicsPsychoPy import EyeLinkCoreGraphicsPsychoPy
 from string import ascii_letters, digits
+import numpy as np
 from psychopy import core
 import sys
 import platform
 import time
-import config
+import rtPupil_config
 
 from PsychoPyFunctions import instructions_screens, terminate_task
 
@@ -109,7 +109,7 @@ def setup_eyelink(win, dummy_mode, edf_fname):
         eyelink_ver = 0  # set version to 0, in case running in Dummy mode
         
     else:
-        eyelink_ver = config.eyelink_ver
+        eyelink_ver = rtPupil_config.eyelink_ver
         
     if not dummy_mode:
         vstr = el_tracker.getTrackerVersionString()
@@ -165,7 +165,7 @@ def setup_eyelink(win, dummy_mode, edf_fname):
 
     # Resolution fix for Mac retina displays
     if 'Darwin' in platform.system():
-        if config.use_retina:
+        if rtPupil_config.use_retina:
             scn_width = int(scn_width/2.0)
             scn_height = int(scn_height/2.0)
             
@@ -226,12 +226,15 @@ def setup_eyelink(win, dummy_mode, edf_fname):
     genv.setCalibrationSounds('off', 'off', 'off')
 
     # Resolution fix for macOS retina display issues
-    if config.use_retina:
+    if rtPupil_config.use_retina:
         genv.fixMacRetinaDisplay()
 
-    #if not dummy_mode:
     # Request Pylink to use the PsychoPy window we opened above for calibration
     pylink.openGraphicsEx(genv)
+
+    # Calibration task constants
+    # Set random seed
+    rng = np.random.default_rng()
 
 def calibrate_eyelink(win, dummy_mode): 
     """

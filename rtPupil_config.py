@@ -1,5 +1,9 @@
 import os
 
+# These are configuration parameters for use in the real-time pupillometry PsychoPy script and the associated Python simulation code. 
+# The goal of having this file is things that a user may wish to change, but likely 
+# will not have to. For example, information about the experimental setup, or the visual aspect of the PsychoPy experiment. 
+
 ### Real-time parameters
 
 ## Initial Thresholds
