@@ -1,6 +1,9 @@
 testing.ipynb
-utils/*
-behav/*
+utils/naninterp.m
+utils/license.txt
+utils/MicrosaccadeAnalysis.m
+utils/PlotMicrosaccadeRate.m
+utils/GetVelocity.m
 behavioral/*
 analysis/*
 # Byte-compiled / optimized / DLL files
