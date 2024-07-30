@@ -1,10 +1,17 @@
-simulations/utils/license.txt
-simulations/utils/naninterp.m
-simulations/utils/stublinks.m
-simulations/analysis/subject_analysis/*
-simulations/testing.ipynb
+<<<<<<< HEAD
+testing.ipynb
+utils/naninterp.m
+utils/license.txt
+utils/MicrosaccadeAnalysis.m
+utils/PlotMicrosaccadeRate.m
+utils/GetVelocity.m
+behavioral/*
+analysis/*
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
+.pytest_cache
+.vscode
 *.py[cod]
 *$py.class
 

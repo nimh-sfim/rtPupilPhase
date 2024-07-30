@@ -138,7 +138,7 @@ for monkey = 1:length(subject_list)
         tested_trial_count = 0;
     
         % Data directory
-        data_dir = fullfile(root_path,'data', 'monkey',['Monkey_',num2str(monkey)],'Pupil_data_task');
+        data_dir = fullfile(root_path,'data', 'monkey',['Monkey_',num2str(monkey)]);
     
         %% Load and Process Pupil Data
         
