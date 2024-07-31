@@ -4,9 +4,11 @@ utils/license.txt
 utils/MicrosaccadeAnalysis.m
 utils/PlotMicrosaccadeRate.m
 utils/GetVelocity.m
-behavioral/*
-analysis/*
-*.wav
+behavioral/
+analysis/
+error.wav 
+qbeep.wav
+type.wav
 
 
 # Byte-compiled / optimized / DLL files
