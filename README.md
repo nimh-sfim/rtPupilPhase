@@ -84,7 +84,7 @@ python3 rtPupilPhase.py
 You can also change the parameters of the rtPupilPhase algorithm easily from the command line. For example, to change the maximum length of the search window:
 
 ```bash
-python3 rtPupilPhase.py -max_search_window_duration_ms 6000
+python3 rtPupilPhase.py --max_search_window_duration_ms 6000
 ```
 
 You can see all of the options that you can specify by using the `-h` command:
