@@ -15,9 +15,9 @@ This is a repository for code associated with [Kronemer et al., 2024](https://ww
 Because SR-Research requires you to download their Developer's Toolkit in order to interface their eye tracker with PsychoPy, the process of getting this code is a little more complicated than just installing some Python packages. To that end, we have provided installation instructions for getting set up to use this code.
 
 1. Ensure that you have the Eyelink Developer's ToolKit installed from SR-Research. This can be downloaded once you have made a free account with SR-Research.
-1. Ensure that you have downloaded [PsychoPy](https://www.psychopy.org/). This code was developed with PsychoPy version 2022.2.4.
-1. Clone this repo to your desired location.
-1. Create and activate a new conda environment by running:
+1. Ensure that you have downloaded [PsychoPy](https://www.psychopy.org/). This code was developed with PsychoPy version 2022.2.4, but has also been tested with version 2024.1.5.
+1. Clone this repo to your desired location (for more details on cloning a repo, see GitHub's instructions [here](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository)).
+1. Create and activate a new conda environment by opening a Terminal, move to the directory that you cloned this repo to and running:
 
     ```bash
     conda create --name rtPupil --file requirements.yml
@@ -25,13 +25,13 @@ Because SR-Research requires you to download their Developer's Toolkit in order 
     ```
 
 1. Install the appropriate version of `pylink` by running the `install_pylink.py` script from the EyeLink Developers ToolKit (see their instructions for more details). Note that the version on PyPi (that you might install via `pip`) is 0.3.3; this code was developed with `pylink` version 2.1.762.0.
-1. Move `error.wav`, `type.wav` and `qbeep.wav` from one of the PsychoPy Coder examples into the cloned directory. These files are required for EyeLink calibration. We don't actually use these files (in fact, we actively turn off sounds in the calibration), but the `pylink` calibration code from SR-Research will crash if they don't exist.
+1. Move `error.wav`, `type.wav` and `qbeep.wav` from one of the PsychoPy Coder examples from SR-Research (likely stored in `~/Applications/Eyelink`) into the cloned directory. These files are required for EyeLink calibration. We don't actually use these files (in fact, we actively turn off sounds in the calibration), but the `pylink` calibration code from SR-Research will crash if they don't exist.
 
 The same Python environment can be used for the real-time PsychoPy code and the Python simulation code.
 
 #### MATLAB
 
-If you are running the MATLAB simulation code, these scripts additional require the following toolboxes:
+If you are running the MATLAB simulation code, these scripts additional require the following MATLAB toolboxes:
 
 - Signal Processing Toolbox
 - Statistics and Machine Learning Toolbox
@@ -73,7 +73,9 @@ Each simulation script will save images of the mean time courses for each pupil 
 
 ## Running the code
 
-Once you have the environment set up, the code can be easily run from a command-line interface. For example, the real-time pupillometry task can be run using the default parameters from Kronemer et al., 2024 with the command:
+### Real-time experiment
+
+Once you have the environment set up, the code can be easily run from a command-line interface. For example, the real-time pupillometry task can be run using the default parameters from Kronemer et al., 2024 (listed in Table 1 of the manuscript) with the command:
 
 ```bash
 python3 rtPupilPhase.py
@@ -91,6 +93,19 @@ You can see all of the options that you can specify by using the `-h` command:
 python3 rtPupilPhase.py -h
 ```
 
+When you run the PsychoPy script, you will get a startup screen from PsychoPy that will ask about a few details:
+
+1. Skip task instructions (n = No, y = Yes): if you select "no", the participant will not be reminded to stay fixated on the central cross.
+1. Eyelink (n = No, y = Yes): whether you are running the code with an EyeLink eye-tracker currently active. If you are intending on running the code in dummy mode (i.e. without an EyeLink), you must select "no", otherwise the code will crash.
+1. EyeLink EDF: This defines the prefix to the EyeLink EDF file that will be created. This filename must be 8 characters or less (before the `.edf` extension) and only contain basic numbers and letters.
+1. Session #: Experimenter can define any number to be logged with the behavioral file along with the timestamp of running the task.
+1. Subject ID: any character/numeric value that the user specifies to define the log file.
+
+When running the task, most screens are advanced by pressing the space bar to continue. The only exception to this is the `Waiting to start` screen, which will only advance by pressing the `5` or `t` key.
+You can quit the task at any time by pressing `p` or the `escape` key. If the task refuses to quit, you can force quit by using the keystroke combination `option + command + escape`.
+
+### Simulations
+
 Similarly, the simulated rtPupilPhase can be run from the command line with the command:
 
 ```bash
@@ -103,7 +118,7 @@ There are no required parameters for the real-time pupillometry code; the simula
 python3 simrtPupilPhase_human.py -h
 ```
 
-Note that the simulation code assumes that you have already converted EDF files to `.mat` files. A tool acccomplish this is provided through the EyeLink Developers ToolKit.
+Note that the simulation code assumes that you have already converted EDF files to `.mat` files. A tool acccomplish this is provided through the EyeLink Developers ToolKit - please see [this thread](https://www.sr-research.com/support/thread-54.html) in the SR-Research forum for more information.
 
 The MATLAB scripts can be run out of the box in MATLAB.
 
