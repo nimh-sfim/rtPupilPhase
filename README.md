@@ -20,12 +20,12 @@ Because SR-Research requires you to download their Developer's Toolkit in order 
 1. Create and activate a new conda environment by opening a Terminal, move to the directory that you cloned this repo to and running:
 
     ```bash
-    conda create --name rtPupil --file requirements.yml
+    conda env create --name rtPupil --file environment.yml
     conda activate rtPupil
     ```
 
-1. Install the appropriate version of `pylink` by running the `install_pylink.py` script from the EyeLink Developers ToolKit (see their instructions for more details). Note that the version on PyPi (that you might install via `pip`) is 0.3.3; this code was developed with `pylink` version 2.1.762.0.
-1. Move `error.wav`, `type.wav` and `qbeep.wav` from one of the PsychoPy Coder examples from SR-Research (likely stored in `~/Applications/Eyelink`) into the cloned directory. These files are required for EyeLink calibration. We don't actually use these files (in fact, we actively turn off sounds in the calibration), but the `pylink` calibration code from SR-Research will crash if they don't exist.
+1. Install the appropriate version of `pylink` by running the `install_pylink.py` script from the EyeLink Developers ToolKit (see [their instructions](https://www.sr-research.com/support/thread-48.html) for more details). Note that the version on PyPi (that you might install via `pip`) is 0.3.3; this code was developed with `pylink` version 2.1.762.0.
+1. Move `error.wav`, `type.wav` and `qbeep.wav` from one of the PsychoPy Coder examples from SR-Research (for example, those stored in `~/Applications/Eyelink/SampleExperiments/Python/examples/Psychopy_examples/Builder/EyeLinkMRIdemo_Builder`) into the cloned directory. These files are required for EyeLink calibration. We don't actually use these files (in fact, we actively turn off sounds in the calibration), but the `pylink` calibration code from SR-Research will crash if they don't exist.
 
 The same Python environment can be used for the real-time PsychoPy code and the Python simulation code.
 
@@ -75,7 +75,9 @@ Each simulation script will save images of the mean time courses for each pupil 
 
 ### Real-time experiment
 
-Once you have the environment set up, the code can be easily run from a command-line interface. For example, the real-time pupillometry task can be run using the default parameters from Kronemer et al., 2024 (listed in Table 1 of the manuscript) with the command:
+#### Command Line Interface
+
+Once you have the environment set up, the code can be easily run from a command-line interface (such as Terminal on a Mac). For example, the real-time pupillometry task can be run using the default parameters from Kronemer et al., 2024 (listed in Table 1 of the manuscript) with the command:
 
 ```bash
 python3 rtPupilPhase.py
@@ -93,7 +95,7 @@ You can see all of the options that you can specify by using the `-h` command:
 python3 rtPupilPhase.py -h
 ```
 
-When you run the PsychoPy script, you will get a startup screen from PsychoPy that will ask about a few details:
+When you run the script, you will get a startup screen from PsychoPy that will ask about a few details:
 
 1. Skip task instructions (n = No, y = Yes): if you select "no", the participant will not be reminded to stay fixated on the central cross.
 1. Eyelink (n = No, y = Yes): whether you are running the code with an EyeLink eye-tracker currently active. If you are intending on running the code in dummy mode (i.e. without an EyeLink), you must select "no", otherwise the code will crash.
@@ -103,6 +105,14 @@ When you run the PsychoPy script, you will get a startup screen from PsychoPy th
 
 When running the task, most screens are advanced by pressing the space bar to continue. The only exception to this is the `Waiting to start` screen, which will only advance by pressing the `5` or `t` key.
 You can quit the task at any time by pressing `p` or the `escape` key. If the task refuses to quit, you can force quit by using the keystroke combination `option + command + escape`.
+
+#### PsychoPy GUI
+
+For the easiest use and most flexibility, we recommend running the fixation experiment from the command line. However, we have also provided two options to implement the rtPupilPhase algorithm in the PsychoPy GUI.
+
+First, you can run the real-time script (i.e. `rtPupilPhase.py`) directly from the PsychoPy GUI. If you prefer this method and wish to change the real-time parameters, you can directly change the inputs to the `main` function at the end of the `rtPupilPhase.py` script.
+
+We have additionally provided a Builder implementation of the fixation task (`rtPupilPhase_builder.psyexp`). This basic code includes setup for the EyeLink eye-tracker and a basic fixation task set up with the default parameters from Kronemer et al., 2024. To change the `rtPupilPhase` algorithm parameters, please edit the code in the `Before Experiment` tab of the `StimulusDecider` code block in the `fixation_routine` routine. A basic loop for a block structure is provided; you can edit this in `BlockData.csv`. We hope that providing a Builder example will lower the barrier to entry for users who have less experience writing PsychoPy code from scratch so that rtPupilPhase can be used in new, exciting kinds of tasks.
 
 ### Simulations
 
