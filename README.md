@@ -103,7 +103,7 @@ When you run the script, you will get a startup screen from PsychoPy that will a
 1. Session #: Experimenter can define any number to be logged with the behavioral file along with the timestamp of running the task.
 1. Subject ID: any character/numeric value that the user specifies to define the log file.
 
-When running the task, most screens are advanced by pressing the space bar to continue. The only exception to this is the `Waiting to start` screen, which will only advance by pressing the `5` or `t` key.
+When running the task, most screens are advanced by pressing the space bar to continue. The two exceptions to this are the EyeLink calibration process, for which you can advance from by pressing `o` (and can be additionally controlled by the EyeLink host computer), and the `Waiting to start` screen, which will only advance by pressing the `5` or `t` key.
 You can quit the task at any time by pressing `p` or the `escape` key. If the task refuses to quit, you can force quit by using the keystroke combination `option + command + escape`.
 
 #### PsychoPy GUI
@@ -134,8 +134,11 @@ The MATLAB scripts can be run out of the box in MATLAB.
 
 ### Known issues with running the code
 
-- If you run the PsychoPy code intending it to be in dummy mode (i.e. no eye-tracker connected) and tell it there is an EyeTracker, the code will try to connect to the non-existant tracker, hang there and eventually crash.
+- If you run the PsychoPy code intending it to be in dummy mode (i.e. no eye-tracker connected) and tell it there is an EyeTracker, the code will try to connect to the non-existant tracker, hang and eventually crash.
 - This code is written so it expects the EyeLink to be tracking the right eye. If the left eye is selected on the EyeLink, the real-time pupillometry will crash. If you need to collect data from the left eye, you can adjust the method used in the `build_search_window` function from the `StimulusDecider` class.
+- If you *are* using a Retina screen with a Mac and you do not tell the code that you are, you will not be able to calibrate the eye tracker, due to issues with the resolution.
+- If you are running the PsychoPy Coder version of the script, you may wish to remove the 50% through the block screen, especially if you are running shorter block durations, as there is a 3 second delay in recording following this screen.
+- the Builder implementation may lag a bit at the end of the experiment as it saves the CSV and the EDF file.
 - The Python simulation code does not include steps for identifying and processing blinks/microsaccades. You may wish to apply additional cleaning to the data.
 
 ### Optional Parameters

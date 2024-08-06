@@ -9,6 +9,10 @@ analysis/
 error.wav 
 qbeep.wav
 type.wav
+data/*.csv
+data/*.log
+data/*.psydat
+rtPupilPhase_builder_lastrun.py
 
 
 # Byte-compiled / optimized / DLL files

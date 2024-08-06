@@ -141,7 +141,8 @@ def main(block_length, max_num_blocks, baseline_duration_ms,
         # Reset block timer to start block
         block_timer.reset()
 
-        # Wait block duration
+        # Wait block duration. Note that you may want to change this method of timing to be more precise. 
+        # Builder implementation uses frame timing. 
         while block_timer.getTime() < block_length:
             # Display a halfway completion screen
             if halfway_screen == False and block_timer.getTime() > block_length/2:
@@ -204,7 +205,7 @@ def main(block_length, max_num_blocks, baseline_duration_ms,
     instructions_screens(win, "Exiting task! \n\nAn experimenter will communicate with you shortly.")
     end_experiment(win)
             
-if __name__ == "__main__":
+if __name__ == "__main__":#
 
     parser = argparse.ArgumentParser(description = 'rtPupilPhase: Real-Time Pupillometry', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("--max_num_blocks", help="Number of task blocks.", 
