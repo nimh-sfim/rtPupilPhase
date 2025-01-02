@@ -1,6 +1,6 @@
 # rtPupilPhase
 
-This is a repository for code associated with [Kronemer et al., 2024](https://www.biorxiv.org/content/10.1101/2024.02.12.579393v1). This repo includes three components:
+This is a repository for code associated with [Kronemer et al., Behavior Research Methods, 2024](https://link.springer.com/article/10.3758/s13428-024-02545-7). This repo includes three components:
 
 1. PsychoPy code implementing a fixation task with real-time pupillometry. This task consists of a black fixation cross on a grey background. In this task, participants are asked to maintain their gaze on the central fixation point at all times and keep a steady head position in the head/chin rest system. Participants completed five 10-minute fixation task blocks. Between each block participants were given break until they indicated they were prepared to begin the next fixation period.
 1. Human pupillometry data collected from the fixation task described above, and monkey pupillometry data.
